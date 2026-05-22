@@ -1,0 +1,7 @@
+interface:
+  display_name: "Verification Gate"
+  short_description: "Run deterministic checks"
+  default_prompt: "Use $verification-gate to run and report relevant project checks."
+policy:
+  allow_implicit_invocation: true
+

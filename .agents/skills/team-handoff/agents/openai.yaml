@@ -1,0 +1,7 @@
+interface:
+  display_name: "Team Handoff"
+  short_description: "Create typed subagent work orders"
+  default_prompt: "Use $team-handoff to prepare a compact WorkOrder or consume an AgentResult."
+policy:
+  allow_implicit_invocation: true
+

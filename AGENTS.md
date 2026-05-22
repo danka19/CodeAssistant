@@ -153,3 +153,60 @@ A development task is done only when:
 - no auto-merge/deploy behavior is introduced;
 - the final summary states what changed, how it was verified, and what remains open.
 
+## Local Codex Team Configuration
+
+This repository uses a project-local Codex team model.
+
+## Default Flow
+
+The root assistant is the only orchestrator. It talks to the user, trims context, creates work orders, integrates results, and writes the final answer.
+
+Subagents are direct children only:
+- `analyst_architect`
+- `programmer`
+- `reviewer`
+- `verifier`
+
+Do not create nested agent chains. Project config sets `max_depth = 1`.
+
+## When To Delegate
+
+Keep work local when:
+- the task is a small single-file edit;
+- the answer is a direct explanation;
+- delegation would require more context transfer than the task itself.
+
+Delegate when:
+- architecture or ownership needs investigation;
+- implementation and review should be separated;
+- deterministic checks can run independently;
+- a clean read-only review is valuable.
+
+## Required Handoff Shape
+
+Use `$team-handoff` for every delegated task.
+
+Child agents receive a compact `WorkOrder`, not the whole conversation.
+Child agents return `AgentResult`, not long prose dumps.
+
+## Skill Policy
+
+Use project-local skills only:
+- `$task-router`
+- `$team-handoff`
+- `$implementation-protocol`
+- `$review-protocol`
+- `$verification-gate`
+
+Do not use Stamp Room-specific skills in this repository.
+
+## Model Policy
+
+Use the configured role models unless there is a stated escalation reason:
+- `analyst_architect`: `gpt-5.4-mini`, medium reasoning, read-only
+- `programmer`: `gpt-5.3-codex`, medium reasoning, workspace-write
+- `reviewer`: `gpt-5.4`, high reasoning, read-only
+- `verifier`: `gpt-5.4-mini`, low reasoning, workspace-write
+
+Do not use the frontier/highest-cost model for routine subagent work just for marginal accuracy.
+

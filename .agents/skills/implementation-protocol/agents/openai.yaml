@@ -1,0 +1,7 @@
+interface:
+  display_name: "Implementation Protocol"
+  short_description: "Keep edits bounded to a write set"
+  default_prompt: "Use $implementation-protocol before modifying project files."
+policy:
+  allow_implicit_invocation: true
+

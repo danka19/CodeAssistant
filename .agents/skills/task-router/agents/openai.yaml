@@ -1,0 +1,7 @@
+interface:
+  display_name: "Task Router"
+  short_description: "Classify requests and choose minimal context"
+  default_prompt: "Use $task-router to classify this request, decide whether to delegate, and name the minimum context."
+policy:
+  allow_implicit_invocation: true
+

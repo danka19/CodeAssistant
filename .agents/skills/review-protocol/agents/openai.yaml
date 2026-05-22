@@ -1,0 +1,7 @@
+interface:
+  display_name: "Review Protocol"
+  short_description: "Review diffs without editing"
+  default_prompt: "Use $review-protocol to review completed work and report findings first."
+policy:
+  allow_implicit_invocation: true
+
