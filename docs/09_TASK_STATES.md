@@ -1,6 +1,6 @@
 # 09 Task States
 
-## State machine
+## State Machine
 
 ```text
 created
@@ -28,32 +28,31 @@ cancelled
 plan_rejected
 ```
 
-## Статусы
+## Statuses
 
-| Status | Что значит | Кто переводит | Следующие статусы | Данные |
+| Status | Meaning | Changed By | Next Statuses | Data |
 |---|---|---|---|---|
-| `created` | Task принят bot | Bot | `queued`, `cancelled` | input, user_id, repo_alias |
-| `queued` | Task ждет worker | Bot/Worker | `planning`, `cancelled`, `failed` | task_id, priority, created_at |
-| `planning` | Claude готовит план | Worker | `waiting_plan_approval`, `implementing`, `failed`, `cancelled` | branch, worktree, planning log |
-| `waiting_plan_approval` | Нужен approval | Worker | `implementing`, `plan_rejected`, `cancelled` | plan path, approval request |
-| `plan_rejected` | План отклонен | Bot/Human | terminal | rejection reason |
-| `implementing` | Codex реализует | Worker | `testing`, `failed`, `cancelled` | implementation log, changed files |
-| `testing` | Worker запускает checks | Worker | `creating_pr`, `failed`, `reviewing`, `cancelled` | test log, check results |
-| `creating_pr` | Создается PR | Worker | `reviewing`, `failed` | branch, commit sha, PR URL |
+| `created` | Task accepted by bot | Bot | `queued`, `cancelled` | input, user_id, repo_alias |
+| `queued` | Task waiting for worker | Bot/Worker | `planning`, `cancelled`, `failed` | task_id, priority, created_at |
+| `planning` | Claude prepares plan | Worker | `waiting_plan_approval`, `implementing`, `failed`, `cancelled` | branch, worktree, planning log |
+| `waiting_plan_approval` | Approval required | Worker | `implementing`, `plan_rejected`, `cancelled` | plan path, approval request |
+| `plan_rejected` | Plan rejected | Bot/Human | terminal | rejection reason |
+| `implementing` | Codex implements | Worker | `testing`, `failed`, `cancelled` | implementation log, changed files |
+| `testing` | Worker runs checks | Worker | `creating_pr`, `failed`, `reviewing`, `cancelled` | test log, check results |
+| `creating_pr` | PR is being created | Worker | `reviewing`, `failed` | branch, commit sha, PR URL |
 | `reviewing` | Claude/CI/CodeRabbit review | Worker | `needs_fix`, `ready_for_human`, `failed` | review.md, CI status |
-| `needs_fix` | Есть blockers | Review runner | `fixing`, `failed`, `cancelled` | blocker list |
-| `fixing` | Codex исправляет blockers | Worker | `testing`, `failed`, `cancelled` | fix.log, attempt number |
-| `ready_for_human` | Готово к ручному review/merge | Worker | `done`, `failed` | PR URL, summary, checks |
-| `done` | Human отметил завершение после merge или решения | Human/Bot | terminal | merge sha or closure note |
-| `failed` | Ошибка выполнения | Worker | terminal or manual retry | failure reason, failed step |
-| `cancelled` | Задача отменена | Bot/Worker | terminal | cancellation reason |
+| `needs_fix` | Blockers exist | Review runner | `fixing`, `failed`, `cancelled` | blocker list |
+| `fixing` | Codex fixes blockers | Worker | `testing`, `failed`, `cancelled` | fix.log, attempt number |
+| `ready_for_human` | Ready for manual review/merge | Worker | `done`, `failed` | PR URL, summary, checks |
+| `done` | Human marked finished after merge or decision | Human/Bot | terminal | merge sha or closure note |
+| `failed` | Execution failed | Worker | terminal or manual retry | failure reason, failed step |
+| `cancelled` | Task cancelled | Bot/Worker | terminal | cancellation reason |
 
-## Правила переходов
+## Transition Rules
 
-- Нельзя переходить из `created` сразу в `implementing`.
-- Нельзя создавать PR без branch и worktree.
-- Нельзя ставить `ready_for_human` без PR URL или явного non-coding результата.
-- Нельзя ставить `done` автоматически после PR creation.
-- `done` не означает auto-merge. В MVP это ручной статус после человеческого решения.
-- Fix loop должен иметь лимит попыток.
-
+- Do not move from `created` directly to `implementing`.
+- Do not create PR without branch and worktree.
+- Do not set `ready_for_human` without PR URL or explicit non-coding result.
+- Do not set `done` automatically after PR creation.
+- `done` does not mean auto-merge. In the MVP, it is a manual status after a human decision.
+- Fix loop must have an attempt limit.

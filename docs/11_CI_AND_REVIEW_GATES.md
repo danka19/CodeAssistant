@@ -1,67 +1,66 @@
 # 11 CI And Review Gates
 
-## CI для MVP
+## CI For MVP
 
-CI может быть минимальным. Главное - PR не должен считаться готовым без отчета о проверках.
+CI can be minimal. The key rule is that a PR must not be considered ready without a check report.
 
-Минимальные варианты:
+Minimal options:
 
 - Python: `ruff`, `pytest`.
 - Node: `npm test`, `npm run lint`, `npm run build`.
-- C++/Qt: configure/build command, unit tests если есть.
-- Docs-only: markdown lint опционально, manual verification допустим.
+- C++/Qt: configure/build command, unit tests if present.
+- Docs-only: markdown lint is optional, manual verification is acceptable.
 
-Если в проекте нет тестов, агент должен явно написать manual verification steps и пометить это в PR.
+If the project has no tests, the agent must explicitly write manual verification steps and include that in the PR.
 
-## Review gates
+## Review Gates
 
-Обязательные gates:
+Required gates:
 
 - Claude review.
-- CI status или явная фиксация отсутствия CI.
+- CI status or explicit record that CI is unavailable.
 - Human review.
 - Manual merge.
 
 Optional gates:
 
 - CodeRabbit PR review.
-- GPT independent critic для high risk.
-- Дополнительный local smoke test.
+- GPT independent critic for high risk.
+- Additional local smoke test.
 
-## Ready criteria
+## Ready Criteria
 
-PR может получить статус `ready_for_human`, если:
+PR can receive status `ready_for_human` when:
 
-- PR создан;
-- diff соответствует плану;
-- unrelated files не изменены;
-- build/test/lint выполнены или честно описана их недоступность;
-- Claude review не нашел blockers;
-- blockers исправлены или явно оставлены на human decision;
-- documentation/manual verification обновлены при необходимости.
+- PR exists;
+- diff matches the plan;
+- unrelated files were not changed;
+- build/test/lint ran or their unavailability is honestly documented;
+- Claude review found no blockers;
+- blockers were fixed or explicitly left for human decision;
+- documentation/manual verification was updated when needed.
 
-## Serious blockers
+## Serious Blockers
 
-Серьезные blockers:
+Serious blockers:
 
-- код не собирается;
-- тесты не проходят;
-- изменение unrelated files;
-- нарушение публичных API без approval;
-- отсутствие проверки для рискованного изменения;
-- нарушение архитектуры;
-- потеря документации;
-- потенциальное удаление данных;
-- небезопасные команды;
-- секреты попали в diff, prompt или log;
-- PR меняет protected branch settings;
-- реализация не соответствует утвержденному плану.
+- code does not build;
+- tests fail;
+- unrelated files changed;
+- public API changed without approval;
+- no check for a risky change;
+- architecture violation;
+- documentation loss;
+- potential data deletion;
+- unsafe commands;
+- secrets in diff, prompt, or log;
+- PR changes protected branch settings;
+- implementation does not match the approved plan.
 
-## Fix loop
+## Fix Loop
 
-MVP должен ограничивать fix loop, например двумя попытками. Если blockers остаются, задача переходит в `needs_fix` или `failed` с понятной причиной и ссылками на логи.
+The MVP must limit the fix loop, for example to two attempts. If blockers remain, the task moves to `needs_fix` or `failed` with a clear reason and links to logs.
 
-## Manual merge
+## Manual Merge
 
-Даже если CI и AI review успешны, merge выполняет человек. Agent может только подготовить PR и статус `ready_for_human`.
-
+Even when CI and AI review pass, a human performs the merge. The agent can only prepare the PR and status `ready_for_human`.

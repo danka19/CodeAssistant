@@ -1,37 +1,37 @@
 # 03 Workflow
 
-## Общий workflow задачи
+## General Task Workflow
 
-1. Пользователь отправляет задачу в Telegram.
-2. Bot создает `task_id`, сохраняет input и ставит статус `created`.
-3. Worker переводит задачу в `queued`, затем `planning`.
-4. Repository manager обновляет base repo.
-5. Worktree manager создает branch и worktree.
-6. Claude runner создает план.
-7. Если нужен approval, задача ждет `/approve` или `/reject`.
-8. Codex runner реализует план.
-9. Worker запускает build/test/lint, если они настроены.
-10. Worker делает commit и push.
-11. GitHub integration создает PR.
-12. CI watcher и review runner проверяют результат.
-13. При blockers запускается fix loop или задача переводится в `needs_fix`.
-14. Notification service отправляет отчет и PR URL.
-15. Human вручную review и merge.
+1. The user sends a task in Telegram.
+2. The bot creates `task_id`, stores input, and sets status `created`.
+3. The worker moves the task to `queued`, then `planning`.
+4. The repository manager updates the base repository.
+5. The worktree manager creates the branch and worktree.
+6. The Claude runner creates the plan.
+7. If approval is required, the task waits for `/approve` or `/reject`.
+8. The Codex runner implements the plan.
+9. The worker runs build/test/lint when configured.
+10. The worker creates a commit and pushes.
+11. GitHub integration creates the PR.
+12. CI watcher and review runner check the result.
+13. If blockers exist, a fix loop starts or the task moves to `needs_fix`.
+14. The notification service sends the report and PR URL.
+15. A human reviews and merges manually.
 
 ## A. Small Task
 
-Примеры: небольшой bugfix, документационный штрих, простая правка конфигурации, локальное исправление теста.
+Examples: small bugfix, documentation touch-up, simple config edit, local test fix.
 
-Особенности:
+Behavior:
 
-- Ручное подтверждение плана не требуется.
-- Claude пишет короткий `plan.md`.
-- Codex реализует сразу после planning.
-- Обязательны git diff/status и доступные проверки.
-- PR создается автоматически.
-- Review gate остается обязательным, но может быть коротким.
+- Manual plan approval is not required.
+- Claude writes a short `plan.md`.
+- Codex implements immediately after planning.
+- Git diff/status and available checks are required.
+- PR is created automatically.
+- Review gate remains required, but can be short.
 
-Поток:
+Flow:
 
 ```text
 /task
@@ -47,18 +47,18 @@
 
 ## B. Medium Task
 
-Примеры: новая функция в существующем модуле, изменение workflow, правка нескольких файлов, миграция без высокого риска.
+Examples: new feature in an existing module, workflow change, multi-file edit, low-risk migration.
 
-Особенности:
+Behavior:
 
-- Claude пишет полноценный `plan.md`.
-- Пользователь подтверждает план через `/approve task-123`.
-- Codex реализует только утвержденный план.
-- Claude review обязателен.
-- При blockers запускается Codex fix loop.
-- PR создается после проверок и summary.
+- Claude writes a full `plan.md`.
+- The user approves the plan through `/approve task-123`.
+- Codex implements only the approved plan.
+- Claude review is required.
+- If blockers exist, a Codex fix loop starts.
+- PR is created after checks and summary.
 
-Поток:
+Flow:
 
 ```text
 /task
@@ -74,19 +74,19 @@
 
 ## C. Large/Risky Task
 
-Примеры: архитектурное изменение, большой refactoring, изменение публичного API, C++/Qt многопоточность, внешние SDK, потенциальная потеря данных.
+Examples: architectural change, large refactor, public API change, C++/Qt concurrency, external SDK integration, potential data loss.
 
-Особенности:
+Behavior:
 
-- Claude пишет `architecture_plan.md`.
-- Пользователь подтверждает архитектурный план.
-- Задача может быть разбита на несколько GitHub issues.
-- Реализация идет по этапам.
-- Каждый этап может иметь отдельную ветку или отдельный PR.
-- Review gate строгий: CI, Claude review, optional independent critic, human review.
-- Fix loop ограничен, чтобы не уйти в бесконечные правки.
+- Claude writes `architecture_plan.md`.
+- The user approves the architecture plan.
+- The task may be split into multiple GitHub issues.
+- Implementation proceeds in stages.
+- Each stage may have a separate branch or PR.
+- Review gate is strict: CI, Claude review, optional independent critic, human review.
+- Fix loop is limited to avoid endless edits.
 
-Поток:
+Flow:
 
 ```text
 /task
@@ -102,9 +102,9 @@
 
 ## Non-Coding Task Mode
 
-Non-coding задачи не обязаны создавать implementation diff.
+Non-coding tasks do not need to create an implementation diff.
 
-Типы:
+Types:
 
 - research;
 - documentation;
@@ -113,11 +113,10 @@ Non-coding задачи не обязаны создавать implementation di
 - monitoring;
 - future life-assistant tasks.
 
-Правила:
+Rules:
 
-- Research должен сохранять `summary.md` и источники, если использовался внешний контекст.
-- Documentation tasks могут создавать PR только с docs changes.
-- Project planning должен явно отделять принятые решения от открытых вопросов.
-- Monitoring после MVP лучше делать отдельным scheduled mode, а не смешивать с dev-agent loop.
-- Future life-assistant tasks должны идти в отдельный security domain и не получать доступ к dev secrets.
-
+- Research must save `summary.md` and sources when external context was used.
+- Documentation tasks may create PRs with docs-only changes.
+- Project planning must explicitly separate accepted decisions from open questions.
+- Monitoring after MVP should be a separate scheduled mode, not mixed into the dev-agent loop.
+- Future life-assistant tasks must live in a separate security domain and must not receive access to dev secrets.

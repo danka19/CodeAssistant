@@ -1,33 +1,33 @@
 # 08 GitHub Flow
 
-## Основные правила
+## Core Rules
 
-- `main` protected.
-- Прямой push в `main` запрещен.
-- Все изменения идут через feature branches.
+- `main` is protected.
+- Direct push to `main` is forbidden.
+- All changes go through feature branches.
 - Branch pattern: `agent/task-123-short-slug`.
-- Каждый результат оформляется Pull Request.
-- CI checks обязательны.
-- Merge всегда ручной.
-- CodeRabbit optional.
+- Every result is represented as a Pull Request.
+- CI checks are required.
+- Merge is always manual.
+- CodeRabbit is optional.
 
-## Branch naming
+## Branch Naming
 
-Формат:
+Format:
 
 ```text
 agent/task-123-short-slug
 ```
 
-Требования:
+Requirements:
 
-- `task-123` соответствует task id в SQLite.
-- `short-slug` строится из задачи и не должен содержать секреты.
-- High risk задачи можно помечать label `risk-high`, а не особым branch name.
+- `task-123` matches the task id in SQLite.
+- `short-slug` is derived from the task and must not contain secrets.
+- High-risk tasks can use label `risk-high`; they do not need a special branch name.
 
 ## Labels
 
-Рекомендуемые labels:
+Recommended labels:
 
 - `agent-task`
 - `agent-planning`
@@ -40,18 +40,18 @@ agent/task-123-short-slug
 - `risk-medium`
 - `risk-high`
 
-## PR lifecycle
+## PR Lifecycle
 
-1. Worker создает PR после commit/push.
-2. PR получает labels `agent-task` и risk label.
-3. CI запускается автоматически.
-4. Claude review создает `review.md` и может оставить PR comment.
-5. CodeRabbit review работает как optional слой.
-6. Если есть blockers, PR получает `agent-needs-fix`.
-7. После fix и успешных проверок PR получает `agent-ready-for-human`.
-8. Human принимает решение и мержит вручную.
+1. Worker creates PR after commit/push.
+2. PR receives labels `agent-task` and a risk label.
+3. CI starts automatically.
+4. Claude review creates `review.md` and may leave a PR comment.
+5. CodeRabbit review works as an optional layer.
+6. If blockers exist, PR receives `agent-needs-fix`.
+7. After fix and successful checks, PR receives `agent-ready-for-human`.
+8. Human decides and merges manually.
 
-## PR template
+## PR Template
 
 ```markdown
 ## Goal
@@ -92,22 +92,21 @@ Link or summary from runs/task-123/plan.md.
 - blockers fixed or remaining notes
 ```
 
-## Protected main settings
+## Protected Main Settings
 
-Минимум:
+Minimum:
 
 - Require pull request before merging.
 - Require status checks to pass.
 - Require conversation resolution.
 - Disallow force pushes.
 - Disallow deletions.
-- Restrict direct pushes for agent token.
+- Restrict direct pushes for the agent token.
 
-## Что не делать в MVP
+## What Not To Do In The MVP
 
 - Auto-merge.
 - Release automation.
 - Deploy from PR.
 - Branch protection changes by worker.
 - Complex merge queue.
-

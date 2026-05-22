@@ -1,25 +1,25 @@
 # 16 MVP Decisions
 
-Дата фиксации: 2026-05-22.
+Decision date: 2026-05-22.
 
-Этот документ фиксирует выбранные решения для первого MVP. Если ранние документы описывают несколько вариантов, решения ниже считаются актуальными для Phase 0-1.
+This document records selected decisions for the first MVP. If earlier documents describe multiple options, the decisions below are authoritative for Phase 0-1.
 
-## 1. Режим запуска
+## 1. Runtime Mode
 
-Выбран вариант A: `systemd`.
+Selected option A: `systemd`.
 
-Причины:
+Reasons:
 
-- меньше слоев для первого VPS-запуска;
-- проще работать с `git`, `gh`, SSH, worktree и файловыми логами;
-- проще авторизовать Claude/Codex CLI под отдельным Linux user;
-- проще отлаживать через `journalctl` и `/runs`.
+- fewer layers for the first VPS launch;
+- easier work with `git`, `gh`, SSH, worktrees, and file logs;
+- easier Claude/Codex CLI authorization under a dedicated Linux user;
+- easier debugging through `journalctl` and `/runs`.
 
-Docker Compose не входит в первый MVP. К нему можно вернуться на Phase 7, если понадобится воспроизводимая среда или дополнительная изоляция. `docker.sock` не выдавать агентам в MVP.
+Docker Compose is not part of the first MVP. It can be reconsidered in Phase 7 if reproducible runtime or extra isolation becomes necessary. Do not expose `docker.sock` to agents in the MVP.
 
-## 2. Repo aliases
+## 2. Repo Aliases
 
-Для MVP используем два alias.
+The MVP uses two aliases.
 
 ```yaml
 repositories:
@@ -48,11 +48,11 @@ repositories:
       - python -m ruff format --check .
 ```
 
-`codeassistant` нужен для разработки самого оркестратора. `sandbox-py` нужен как безопасный тестовый репозиторий для первых end-to-end прогонов.
+`codeassistant` is used for developing the orchestrator itself. `sandbox-py` is a safe test repository for early end-to-end runs.
 
-## 3. CI/test команды
+## 3. CI/Test Commands
 
-Для первого Python-репозитория используем рекомендованный набор:
+For the first Python repository, use the recommended set:
 
 ```bash
 python -m compileall src tests
@@ -61,56 +61,56 @@ python -m ruff check .
 python -m ruff format --check .
 ```
 
-Минимальные тестовые зоны для самого оркестратора:
+Minimal test areas for the orchestrator itself:
 
-- SQLite schema и migrations;
+- SQLite schema and migrations;
 - task state transitions;
 - branch slug generation;
 - command allowlist/blocklist;
 - secret redaction;
 - fake Claude/Codex runners;
 - fake GitHub client;
-- temporary git repo integration test для worktree.
+- temporary git repo integration test for worktree.
 
-Если папки `tests` еще нет, команда `compileall` должна быть адаптирована в Phase 0 implementation. Документационная цель остается прежней: automated checks должны быть явными, а их отсутствие не должно маскироваться.
+If the `tests` directory does not exist yet, the `compileall` command must be adapted during Phase 0 implementation. The documentation goal remains unchanged: automated checks must be explicit, and their absence must not be hidden.
 
-## 4. GitHub auth
+## 4. GitHub Auth
 
-Выбран вариант A: fine-grained Personal Access Token.
+Selected option A: fine-grained Personal Access Token.
 
-Минимальные permissions:
+Minimum permissions:
 
 - selected repositories only;
 - `Contents: read/write`;
 - `Pull requests: read/write`;
-- `Issues: read/write` опционально для будущей разбивки задач;
+- `Issues: read/write`, optional for future task splitting;
 - `Metadata: read`.
 
-Не выдавать для MVP:
+Do not grant for MVP:
 
 - `Administration`;
 - `Secrets`;
 - `Environments`;
 - `Deployments`;
-- `Workflows`, если нет отдельной необходимости.
+- `Workflows`, unless there is a separate need.
 
-GitHub App остается future option. `github_client.py` должен быть спроектирован так, чтобы позже заменить PAT auth на GitHub App без переписывания всего workflow.
+GitHub App remains a future option. `github_client.py` should be designed so PAT auth can later be replaced with GitHub App auth without rewriting the whole workflow.
 
-## 5. Claude/Codex CLI auth
+## 5. Claude/Codex CLI Auth
 
-Выбран вариант A: интерактивная авторизация CLI под Linux user `ai-orchestrator`.
+Selected option A: interactive CLI authorization under Linux user `ai-orchestrator`.
 
-Правила:
+Rules:
 
-- Claude CLI и Codex CLI авторизуются вручную по SSH один раз под тем же user, под которым работает worker;
-- worker не должен логировать auth state, token files, env или CLI config;
-- API-key режим не включать, пока он не нужен для надежности, лимитов или прозрачной стоимости;
-- стоимость и лимиты фиксировать как открытый operational question;
-- если login-based режим станет нестабильным или непрозрачным по стоимости, вернуться к API-key варианту с явным budget control.
+- Claude CLI and Codex CLI are authorized manually over SSH once under the same user that runs the worker;
+- worker must not log auth state, token files, env, or CLI config;
+- API-key mode should not be enabled until needed for reliability, limits, or transparent cost;
+- cost and limits must be tracked as an open operational question;
+- if login-based mode becomes unstable or cost-opaque, return to an API-key variant with explicit budget control.
 
-## 6. Ролевая цепочка MVP
+## 6. MVP Role Chain
 
-Выбран последовательный pipeline из четырех ролей:
+Selected sequential pipeline of four roles:
 
 ```text
 Telegram user
@@ -122,32 +122,32 @@ Telegram user
 -> PR ready for Human
 ```
 
-Это не multi-agent swarm. В MVP роли запускаются последовательно, с жесткими границами ответственности и typed handoff между этапами.
+This is not a multi-agent swarm. In the MVP, roles run sequentially with strict responsibility boundaries and typed handoff between stages.
 
 ## 7. Intake Assistant
 
-Intake Assistant сидит перед dev-orchestrator и помогает сформулировать задачу до запуска разработки.
+Intake Assistant sits before the dev orchestrator and helps formulate the task before development starts.
 
-Ответственность:
+Responsibilities:
 
-- обсудить задачу с пользователем;
-- уточнить цель, ограничения и ожидаемый результат;
-- определить repo alias;
-- предложить task type и risk level;
-- сформировать `task_brief.yaml`;
-- запросить подтверждение brief перед передачей в dev pipeline, если задача не очевидно small;
-- не запускать git, shell, Claude Planner, Codex или PR creation напрямую.
+- discuss the task with the user;
+- clarify goal, constraints, and expected result;
+- determine repo alias;
+- suggest task type and risk level;
+- produce `task_brief.yaml`;
+- request brief confirmation before passing to the dev pipeline unless the task is clearly small;
+- not run git, shell, Claude Planner, Codex, or PR creation directly.
 
-Запрещено:
+Forbidden:
 
-- менять файлы;
-- иметь write access к git;
-- иметь доступ к production secrets;
-- запускать shell-команды;
-- создавать PR;
-- принимать merge decision.
+- editing files;
+- having write access to git;
+- accessing production secrets;
+- running shell commands;
+- creating PRs;
+- making merge decisions.
 
-Минимальные состояния intake:
+Minimal intake states:
 
 ```text
 drafting
@@ -156,9 +156,9 @@ submitted_to_orchestrator
 cancelled
 ```
 
-## 8. Typed handoff
+## 8. Typed Handoff
 
-Intake Assistant передает дальше только типизированный brief.
+Intake Assistant passes only a typed brief.
 
 ```yaml
 task_brief:
@@ -180,62 +180,61 @@ task_brief:
     - "python -m pytest -q"
 ```
 
-`task_brief.yaml` сохраняется в `/runs/task-123/input.md` или `/runs/task-123/task_brief.yaml` и становится главным входом для Claude Planner.
+`task_brief.yaml` is saved in `/runs/task-123/input.md` or `/runs/task-123/task_brief.yaml` and becomes the main input for Claude Planner.
 
 ## 9. Claude Planner
 
-Claude Planner получает `task_brief.yaml`, документы проекта и ограниченный repository context.
+Claude Planner receives `task_brief.yaml`, project documents, and limited repository context.
 
-Ответственность:
+Responsibilities:
 
-- создать `plan.md` для small/medium задач;
-- создать `architecture_plan.md` для high-risk задач;
-- явно указать scope и not-in-scope;
-- предложить проверочные команды;
-- отметить, нужен ли approval;
-- не менять файлы и не запускать реализацию.
+- create `plan.md` for small/medium tasks;
+- create `architecture_plan.md` for high-risk tasks;
+- explicitly state scope and not-in-scope;
+- propose verification commands;
+- mark whether approval is required;
+- not edit files or run implementation.
 
 ## 10. Codex Implementer
 
-Codex Implementer получает утвержденный `plan.md` и работает только в task worktree.
+Codex Implementer receives the approved `plan.md` and works only inside the task worktree.
 
-Ответственность:
+Responsibilities:
 
-- реализовать план;
-- добавлять или обновлять тесты;
-- не менять unrelated files;
-- не расширять scope без остановки и нового approval;
-- подготовить diff, commit summary и verification notes.
+- implement the plan;
+- add or update tests;
+- avoid unrelated files;
+- stop and require new approval before expanding scope;
+- prepare diff, commit summary, and verification notes.
 
-Ограничение MVP: одновременно не более одного Codex Implementer на один репозиторий.
+MVP constraint: no more than one Codex Implementer per repository at the same time.
 
 ## 11. Claude Reviewer
 
-Claude Reviewer получает task brief, plan, diff, logs и test results.
+Claude Reviewer receives the task brief, plan, diff, logs, and test results.
 
-Ответственность:
+Responsibilities:
 
-- проверить соответствие реализации плану;
-- найти blockers;
-- отделить blockers от non-blocking notes;
-- написать `review.md`;
-- не редактировать код самостоятельно.
+- verify that implementation matches the plan;
+- find blockers;
+- separate blockers from non-blocking notes;
+- write `review.md`;
+- not edit code directly.
 
-Fix loop ограничен одной-двумя попытками. Если blockers остаются, задача переходит в `needs_fix` или `failed` с понятной причиной.
+The fix loop is limited to one or two attempts. If blockers remain, the task moves to `needs_fix` or `failed` with a clear reason.
 
-## 12. Модели, лимиты и параллельность
+## 12. Models, Limits, And Parallelism
 
-MVP должен фиксировать роль, модель и лимиты в config, а не позволять агентам выбирать это самостоятельно.
+The MVP must fix role, model, and limits in config instead of letting agents choose them independently.
 
-Минимальная политика:
+Minimal policy:
 
-- `intake_assistant`: недорогая/быстрая модель или локальная логика, без tools write access;
+- `intake_assistant`: cheap/fast model or local logic, no write tools;
 - `claude_planner`: Claude, planning/review context;
-- `codex_implementer`: Codex CLI, write access только в worktree;
+- `codex_implementer`: Codex CLI, write access only in worktree;
 - `claude_reviewer`: Claude, read-only review context;
 - max concurrent implementers per repo: `1`;
 - max fix attempts: `2`;
-- max planner pass: `1` для small/medium, отдельный approval для high risk.
+- max planner pass: `1` for small/medium, separate approval for high risk.
 
-Цель ограничений - не сжигать лимиты и не создавать конфликтующие параллельные diff.
-
+The goal of these limits is to avoid burning limits and creating conflicting parallel diffs.

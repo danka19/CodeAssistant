@@ -1,83 +1,82 @@
 # 04 Security Model
 
-## Базовая модель
+## Baseline Model
 
-MVP работает на Linux VPS под отдельным непривилегированным пользователем, например `ai-orchestrator`. Агентная система не должна иметь root-доступ по умолчанию и не должна иметь доступ к production secrets, платежам, покупкам или опасным системным действиям.
+The MVP runs on a Linux VPS under a separate unprivileged user, for example `ai-orchestrator`. The agent system must not have root access by default and must not have access to production secrets, payments, purchases, or dangerous system actions.
 
-## Обязательные ограничения
+## Required Constraints
 
-- Отдельный Linux user для агента.
-- Запрет root по умолчанию.
-- Запрет `docker.sock` в MVP.
-- Scoped GitHub token или GitHub App.
+- Separate Linux user for the agent.
+- No root by default.
+- No `docker.sock` in the MVP.
+- Scoped GitHub token or GitHub App.
 - Protected `main`.
 - Required PR review.
 - Required status checks.
-- Запрет auto-merge.
-- Секреты не хранить в prompts, logs, PR body и code.
-- Telegram bot token хранить в env/secrets.
-- OpenAI/Anthropic auth не логировать.
-- Dangerous shell commands должны быть заблокированы или требовать approval.
-- Платежи, покупки и production deploy не входят в MVP.
+- No auto-merge.
+- Do not store secrets in prompts, logs, PR body, or code.
+- Store Telegram bot token in env/secrets.
+- Do not log OpenAI/Anthropic auth.
+- Dangerous shell commands must be blocked or require approval.
+- Payments, purchases, and production deploy are not part of the MVP.
 
-## Секреты
+## Secrets
 
-Разрешенные места хранения:
+Allowed storage:
 
-- systemd environment file с правами `600`;
-- Docker Compose secrets или `.env` вне git;
-- secret manager после MVP.
+- systemd environment file with `600` permissions;
+- `.env` outside git for local development only;
+- secret manager after MVP.
 
-Запрещено:
+Forbidden:
 
-- commit секретов;
-- запись токенов в `/runs`;
-- вывод `env` целиком;
-- вставка auth headers в prompts;
-- передача production credentials агентам.
+- committing secrets;
+- writing tokens to `/runs`;
+- printing the full `env`;
+- injecting auth headers into prompts;
+- passing production credentials to agents.
 
-## GitHub security
+## GitHub Security
 
-- `main` protected.
-- Direct push в `main` запрещен.
-- Merge только вручную.
-- Required checks должны соответствовать реальному CI проекта.
-- Agent token должен иметь минимально нужные permissions:
-  - read/write contents для feature branches;
+- `main` is protected.
+- Direct push to `main` is forbidden.
+- Merge is manual only.
+- Required checks must match the real project CI.
+- Agent token must have minimum required permissions:
+  - read/write contents for feature branches;
   - pull requests write;
   - checks/status read;
-  - issues write опционально.
-- Административные настройки репозитория не должны меняться worker без отдельного approval.
+  - issues write, optional.
+- Repository administration settings must not be changed by the worker without separate approval.
 
-## Dangerous commands
+## Dangerous Commands
 
-MVP должен блокировать или требовать approval для команд, которые:
+The MVP must block or require approval for commands that:
 
-- удаляют файлы рекурсивно;
-- меняют системные директории;
-- запускают `sudo`;
-- меняют firewall/users/ssh;
-- обращаются к `docker.sock`;
-- делают deploy;
-- очищают git history;
-- force-push без разрешения;
-- читают произвольные secret files.
+- delete files recursively;
+- change system directories;
+- run `sudo`;
+- change firewall/users/ssh;
+- access `docker.sock`;
+- deploy;
+- rewrite git history;
+- force-push without permission;
+- read arbitrary secret files.
 
-## Approval gates
+## Approval Gates
 
-Обязательные approval gates:
+Required approval gates:
 
-- План крупной или рискованной задачи.
-- Создание PR, если задача помечена high risk.
-- Повторный запуск после blocker-review, если fix может изменить архитектуру.
+- Plan for a large or risky task.
+- PR creation when the task is marked high risk.
+- Re-run after blocker review if the fix may change architecture.
 - Merge.
 - Deploy.
-- Доступ к новым секретам.
-- Подключение сторонних сервисов.
-- Изменение security settings.
+- Access to new secrets.
+- Third-party service connection.
+- Security setting changes.
 - Force push.
 
-## MVP policy
+## MVP Policy
 
-В MVP лучше отказать в действии, чем дать агенту широкий доступ. Если задача требует root, production secrets, платежей, auto-deploy или внешних сервисов, worker должен перевести задачу в `failed` или `waiting_approval` с понятным объяснением.
-
+In the MVP it is better to refuse an action than to give an agent broad access. If a task requires root, production secrets, payments, auto-deploy, or external services, the worker must move the task to `failed` or `waiting_approval` with a clear explanation.

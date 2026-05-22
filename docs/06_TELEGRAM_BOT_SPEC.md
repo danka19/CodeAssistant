@@ -1,101 +1,100 @@
 # 06 Telegram Bot Spec
 
-## Назначение
+## Purpose
 
-Telegram bot - основной пользовательский интерфейс MVP. Он принимает задачи, показывает статус, отдает короткие логи и принимает approvals.
+The Telegram bot is the main user interface for the MVP. It accepts tasks, shows status, returns short logs, and accepts approvals.
 
-Для MVP допустим один разрешенный Telegram user id.
+For the MVP, one allowed Telegram user id is sufficient.
 
-## Команды
+## Commands
 
 ### `/task`
 
-- Назначение: создать новую задачу.
-- Формат: `/task <repo_alias> <описание задачи>`.
-- Пример: `/task greenflow Исправить падение при закрытии окна камеры`.
-- Что делает: создает `task_id`, сохраняет input, ставит статус `created`.
-- Статус: `created` -> `queued`.
-- Ошибки: неизвестный repo alias, пустое описание, пользователь не разрешен, база недоступна.
-- Ответ: `Task task-123 accepted. Status: queued.`
+- Purpose: create a new task.
+- Format: `/task <repo_alias> <task description>`.
+- Example: `/task codeassistant Fix crash when camera window closes`.
+- Behavior: creates `task_id`, stores input, sets status `created`.
+- Status: `created` -> `queued`.
+- Errors: unknown repo alias, empty description, unauthorized user, database unavailable.
+- Response: `Task task-123 accepted. Status: queued.`
 
 ### `/status`
 
-- Назначение: показать состояние задачи.
-- Формат: `/status <task_id>`.
-- Пример: `/status task-123`.
-- Что делает: читает SQLite и возвращает статус, branch, PR URL, последний event.
-- Статус: не меняет.
-- Ошибки: task not found, user not allowed.
-- Ответ: `task-123: implementing. Branch: agent/task-123-fix-camera-close.`
+- Purpose: show task state.
+- Format: `/status <task_id>`.
+- Example: `/status task-123`.
+- Behavior: reads SQLite and returns status, branch, PR URL, latest event.
+- Status: unchanged.
+- Errors: task not found, user not allowed.
+- Response: `task-123: implementing. Branch: agent/task-123-fix-camera-close.`
 
 ### `/log`
 
-- Назначение: показать последние строки task logs.
-- Формат: `/log <task_id>`.
-- Пример: `/log task-123`.
-- Что делает: возвращает tail из `events.jsonl` и ключевых логов.
-- Статус: не меняет.
-- Ошибки: task not found, logs not available, log too large.
-- Ответ: короткий фрагмент без секретов.
+- Purpose: show recent task log lines.
+- Format: `/log <task_id>`.
+- Example: `/log task-123`.
+- Behavior: returns a tail from `events.jsonl` and key logs.
+- Status: unchanged.
+- Errors: task not found, logs unavailable, log too large.
+- Response: short secret-free fragment.
 
 ### `/approve`
 
-- Назначение: подтвердить план или gated action.
-- Формат: `/approve <task_id>`.
-- Пример: `/approve task-123`.
-- Что делает: записывает approval event.
-- Статус: `waiting_plan_approval` -> `implementing` или `queued`.
-- Ошибки: task not found, task not waiting approval, user not allowed.
-- Ответ: `task-123 approved. Implementation will start.`
+- Purpose: approve a plan or gated action.
+- Format: `/approve <task_id>`.
+- Example: `/approve task-123`.
+- Behavior: records an approval event.
+- Status: `waiting_plan_approval` -> `implementing` or `queued`.
+- Errors: task not found, task not waiting for approval, user not allowed.
+- Response: `task-123 approved. Implementation will start.`
 
 ### `/reject`
 
-- Назначение: отклонить план.
-- Формат: `/reject <task_id> [причина]`.
-- Пример: `/reject task-123 слишком большой scope`.
-- Что делает: записывает rejection.
-- Статус: `waiting_plan_approval` -> `plan_rejected`.
-- Ошибки: task not found, task not waiting approval.
-- Ответ: `task-123 rejected. Reason saved.`
+- Purpose: reject a plan.
+- Format: `/reject <task_id> [reason]`.
+- Example: `/reject task-123 scope too broad`.
+- Behavior: records rejection.
+- Status: `waiting_plan_approval` -> `plan_rejected`.
+- Errors: task not found, task not waiting for approval.
+- Response: `task-123 rejected. Reason saved.`
 
 ### `/cancel`
 
-- Назначение: отменить задачу.
-- Формат: `/cancel <task_id>`.
-- Пример: `/cancel task-123`.
-- Что делает: ставит cancel flag, worker останавливает дальнейшие этапы при ближайшей безопасной точке.
-- Статус: текущий статус -> `cancelled`, если остановка возможна.
-- Ошибки: task not found, already finished, cancellation unsafe at current step.
-- Ответ: `task-123 cancellation requested.`
+- Purpose: cancel a task.
+- Format: `/cancel <task_id>`.
+- Example: `/cancel task-123`.
+- Behavior: sets cancel flag; worker stops later stages at the nearest safe point.
+- Status: current status -> `cancelled` if stopping is possible.
+- Errors: task not found, already finished, cancellation unsafe at current step.
+- Response: `task-123 cancellation requested.`
 
 ### `/help`
 
-- Назначение: показать команды.
-- Формат: `/help`.
-- Что делает: отправляет краткую справку.
-- Статус: не меняет.
-- Ошибки: нет.
-- Ответ: список команд и примеры.
+- Purpose: show commands.
+- Format: `/help`.
+- Behavior: sends short help.
+- Status: unchanged.
+- Errors: none.
+- Response: command list and examples.
 
-## Уведомления
+## Notifications
 
-MVP должен отправлять уведомления:
+The MVP must send notifications for:
 
-- `task accepted`: задача создана.
-- `planning started`: Claude planning запущен.
-- `plan ready`: план сохранен.
-- `approval required`: нужен `/approve` или `/reject`.
-- `implementation started`: Codex запущен.
-- `tests started`: build/test/lint начались.
-- `PR created`: PR создан, ссылка приложена.
-- `review blockers found`: найдены blockers, задача ушла в fix loop или `needs_fix`.
-- `task ready`: задача готова к human review.
-- `task failed`: задача упала, причина приложена.
+- `task accepted`: task created.
+- `planning started`: Claude planning started.
+- `plan ready`: plan saved.
+- `approval required`: `/approve` or `/reject` required.
+- `implementation started`: Codex started.
+- `tests started`: build/test/lint started.
+- `PR created`: PR created with link.
+- `review blockers found`: blockers found, task moved to fix loop or `needs_fix`.
+- `task ready`: task ready for human review.
+- `task failed`: task failed with reason.
 
-## Ограничения сообщений
+## Message Limits
 
-- Не отправлять большие логи целиком.
-- Не отправлять секреты.
-- Для длинных summary отправлять путь к файлу или короткую выдержку.
-- Inline buttons можно добавить после MVP, но текстовые команды достаточно для первого запуска.
-
+- Do not send large logs in full.
+- Do not send secrets.
+- For long summaries, send a path or short excerpt.
+- Inline buttons can be added after MVP; text commands are enough for the first launch.

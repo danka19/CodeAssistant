@@ -2,94 +2,93 @@
 
 ## Claude
 
-Claude используется как planner, architect и reviewer.
+Claude is used as planner, architect, and reviewer.
 
-Ответственность:
+Responsibilities:
 
-- анализ задачи;
-- изучение документации;
-- архитектурное планирование;
-- написание `plan.md`;
-- написание `architecture_plan.md` для large/risky задач;
-- написание `review.md`;
-- поиск blockers;
-- проверка соответствия реализации плану;
-- оценка риска задачи.
+- task analysis;
+- documentation review;
+- architecture planning;
+- writing `plan.md`;
+- writing `architecture_plan.md` for large/risky tasks;
+- writing `review.md`;
+- finding blockers;
+- checking whether implementation matches the plan;
+- estimating task risk.
 
-Не должен:
+Must not:
 
-- менять код в MVP;
-- делать merge;
-- выдавать секреты в prompts/logs;
-- принимать финальное решение вместо человека.
+- edit code in the MVP;
+- merge;
+- expose secrets in prompts/logs;
+- make the final decision instead of a human.
 
 ## Codex
 
-Codex используется как implementer.
+Codex is used as implementer.
 
-Ответственность:
+Responsibilities:
 
-- реализация утвержденного `plan.md`;
-- изменение файлов в task worktree;
-- добавление или обновление тестов;
-- исправление замечаний из review;
-- подготовка diff;
-- написание commit summary;
-- обновление документации/changelog при необходимости.
+- implement the approved `plan.md`;
+- edit files in the task worktree;
+- add or update tests;
+- fix review findings;
+- prepare diff;
+- write commit summary;
+- update documentation/changelog when needed.
 
-Не должен:
+Must not:
 
-- расширять scope без причины;
-- менять unrelated files;
-- делать opportunistic refactoring;
-- обходить approval;
-- делать merge в `main`.
+- expand scope without cause;
+- edit unrelated files;
+- do opportunistic refactoring;
+- bypass approval;
+- merge into `main`.
 
 ## CodeRabbit
 
-CodeRabbit используется как дополнительный PR-review слой.
+CodeRabbit is used as an additional PR-review layer.
 
-Ответственность:
+Responsibilities:
 
-- дополнительный PR-review;
-- поиск очевидных ошибок;
-- комментарии в PR;
-- подсветка потенциальных regressions.
+- additional PR review;
+- finding obvious errors;
+- PR comments;
+- highlighting possible regressions.
 
-Ограничения:
+Constraints:
 
-- не является главным архитектурным reviewer;
-- не заменяет Claude review;
-- не заменяет human review;
-- не принимает merge decision.
+- not the main architecture reviewer;
+- does not replace Claude review;
+- does not replace human review;
+- does not make merge decisions.
 
 ## Human
 
-Human остается владельцем финального решения.
+The human remains the owner of the final decision.
 
-Ответственность:
+Responsibilities:
 
-- подтверждает крупные планы;
-- принимает финальное решение по спорным вопросам;
-- мержит PR;
-- выдает новые доступы;
-- подтверждает опасные действия;
-- решает, когда расширять MVP.
+- approves large plans;
+- makes final decisions on disputed questions;
+- merges PRs;
+- grants new access;
+- approves dangerous actions;
+- decides when to expand the MVP.
 
-## GPT как независимый критик
+## GPT As Independent Critic
 
-GPT имеет смысл подключать как независимого критика, когда цена ошибки высокая или нужен второй взгляд на архитектуру.
+GPT is useful as an independent critic when the cost of error is high or a second architecture opinion is needed.
 
-Примеры:
+Examples:
 
-- сложная архитектура;
-- спорное решение;
-- большой refactoring;
-- C++/Qt многопоточность;
-- интеграции с внешними SDK;
-- миграции данных;
-- security-sensitive изменения;
-- высокая цена ошибки.
+- complex architecture;
+- disputed decision;
+- large refactor;
+- C++/Qt concurrency;
+- external SDK integrations;
+- data migrations;
+- security-sensitive changes;
+- high cost of error.
 
-GPT не должен становиться обязательным gate для всех задач в MVP. Его лучше включать точечно для medium/high risk задач.
-
+GPT must not become a required gate for every MVP task. It should be enabled selectively for medium/high-risk tasks.

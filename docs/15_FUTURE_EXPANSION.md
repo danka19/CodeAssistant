@@ -1,8 +1,8 @@
 # 15 Future Expansion
 
-Этот документ описывает расширения после MVP. Эти пункты не должны попадать в scope первого MVP.
+This document lists post-MVP extensions. These items must not enter the scope of the first MVP.
 
-## Возможные улучшения
+## Possible Improvements
 
 - Web UI.
 - Task dashboard.
@@ -11,81 +11,80 @@
 - Voice input.
 - Periodic tasks.
 - Monitoring.
-- Life-assistant отдельным контуром.
+- Life-assistant as a separate boundary.
 - Local models for classification.
 - Multi-agent mode.
 - Alternative implementation branches.
 - GPT as independent critic.
 - Support for multiple repositories.
 - Support for multiple users.
-- Integration with Jira/Linear.
+- Jira/Linear integration.
 - Deployment gates.
 
 ## Web UI
 
-Может заменить часть Telegram debug flow: список задач, статусы, ссылки на логи, approvals, фильтры. Не нужен для MVP, потому что Telegram + GitHub достаточно для первого end-to-end workflow.
+A web UI may replace part of the Telegram debug flow: task list, statuses, log links, approvals, filters. It is not needed for the MVP because Telegram plus GitHub are enough for the first end-to-end workflow.
 
-## Task dashboard
+## Task Dashboard
 
-Полезен после появления десятков задач. До этого SQLite и Telegram `/status` проще.
+Useful after dozens of tasks exist. Until then, SQLite and Telegram `/status` are simpler.
 
 ## Cline Kanban
 
-Можно использовать для визуального управления задачами, если появится устойчивый поток задач и потребность в board view.
+Can be used for visual task management if there is a steady task flow and a need for board view.
 
-## OpenHands smoke test
+## OpenHands Smoke Test
 
-Может стать дополнительным validation layer, но не должен быть обязательным dependency MVP.
+Can become an additional validation layer, but must not be a required MVP dependency.
 
-## Voice input
+## Voice Input
 
-Удобно для постановки задач, но добавляет speech-to-text, ошибки распознавания и security concerns. После MVP.
+Convenient for task intake, but adds speech-to-text, recognition errors, and security concerns. Post-MVP.
 
-## Periodic tasks and monitoring
+## Periodic Tasks And Monitoring
 
-Можно добавить scheduled checks: проверка CI, stale PR, dependency alerts. Это отдельный режим, не базовый task execution loop.
+Scheduled checks can be added later: CI checks, stale PRs, dependency alerts. This is a separate mode, not the base task execution loop.
 
-## Life-assistant
+## Life Assistant
 
-Должен быть отдельным контуром:
+Must be a separate boundary:
 
-- отдельные secrets;
-- отдельные approvals;
-- отдельные logs;
-- отсутствие доступа к dev repo tokens без необходимости;
-- отдельная модель риска.
+- separate secrets;
+- separate approvals;
+- separate logs;
+- no access to dev repo tokens unless necessary;
+- separate risk model.
 
-## Local models for classification
+## Local Models For Classification
 
-Можно использовать дешевые локальные модели для первичной классификации задач, но в MVP достаточно простых правил и Claude planning.
+Cheap local models can be used for initial task classification, but simple rules and Claude planning are enough for the MVP.
 
-## Multi-agent mode
+## Multi-Agent Mode
 
-Параллельные агенты, competition branches или swarm mode стоит добавлять только после стабильного single-agent workflow.
+Parallel agents, competition branches, or swarm mode should be added only after the single-agent workflow is stable.
 
-## Alternative implementation branches
+## Alternative Implementation Branches
 
-Для сложных задач можно генерировать два варианта решения в разных ветках и сравнивать. Это повышает качество, но увеличивает стоимость и сложность.
+For complex tasks, the system can generate two solution variants in different branches and compare them. This may improve quality, but increases cost and complexity.
 
-## GPT as independent critic
+## GPT As Independent Critic
 
-Можно подключать GPT для независимой критики high-risk решений, особенно при архитектуре, C++/Qt многопоточности, SDK integration и больших refactoring.
+GPT can be used for independent critique of high-risk decisions, especially architecture, C++/Qt concurrency, SDK integrations, and large refactors.
 
-## Multiple repositories and users
+## Multiple Repositories And Users
 
-После MVP можно добавить:
+After MVP, add:
 
 - repo registry;
 - per-repo commands;
-- permissions per user;
+- per-user permissions;
 - audit by user;
 - quotas.
 
-## Jira/Linear integration
+## Jira/Linear Integration
 
-Может стать источником задач или местом синхронизации статусов. Не нужен до стабильного Telegram/GitHub loop.
+Can become a task source or status sync target. Not needed before the Telegram/GitHub loop is stable.
 
-## Deployment gates
+## Deployment Gates
 
-Deploy должен оставаться отдельным этапом после MVP. Для него нужны отдельные approvals, secrets, environments, rollback plan и audit.
-
+Deploy must remain a separate post-MVP stage. It needs separate approvals, secrets, environments, rollback plan, and audit.
