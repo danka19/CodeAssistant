@@ -159,6 +159,24 @@ Default principle:
 
 Do not pay 5x cost for a routine 1% accuracy gain unless the task is high-risk enough to justify it.
 
+`gpt-5.5` is reserved for explicit escalation only.
+
+Allowed escalation reasons:
+- high-impact architecture decision;
+- security-sensitive change;
+- data-loss or irreversible-state risk;
+- conflicting source-of-truth docs or review findings;
+- repeated failure on cheaper models;
+- a decision that materially constrains future system design.
+
+Disallowed escalation reasons:
+- routine implementation;
+- docs-only changes;
+- low-risk planning;
+- ordinary test or lint failures;
+- broad repository discovery;
+- marginal quality preference without concrete risk.
+
 ---
 
 ## 7. Migration Plan
@@ -168,4 +186,3 @@ Do not pay 5x cost for a routine 1% accuracy gain unless the task is high-risk e
 3. Remove Stamp Room-specific skills from `%USERPROFILE%\.codex\skills` after confirming Stamp Room has local copies.
 4. If Stamp Room needs current Codex repo-skill discovery, migrate its `.codex/skills` tree to `.agents/skills` inside Stamp Room in a separate Stamp Room-scoped change.
 5. Do not copy Stamp Room skills into this project.
-

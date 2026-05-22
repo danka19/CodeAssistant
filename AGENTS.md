@@ -210,3 +210,20 @@ Use the configured role models unless there is a stated escalation reason:
 
 Do not use the frontier/highest-cost model for routine subagent work just for marginal accuracy.
 
+Use `gpt-5.5` only as an explicit escalation model. The parent assistant must state the reason in the WorkOrder before using it.
+
+Valid `gpt-5.5` escalation reasons:
+- high-impact architecture decision;
+- security-sensitive change;
+- data-loss or irreversible-state risk;
+- conflicting source-of-truth docs or review findings;
+- repeated failure on cheaper models;
+- a decision that materially constrains future system design.
+
+Invalid `gpt-5.5` reasons:
+- routine code edits;
+- docs-only updates;
+- normal test/lint failures;
+- broad file discovery;
+- desire for a small generic accuracy gain.
+

@@ -196,6 +196,29 @@ Do not use a frontier/highest-cost model for a role unless:
 - the task has high architectural risk;
 - the parent assistant states the reason before escalation.
 
+`gpt-5.5` is the escalation model, not a default role model.
+
+Use `gpt-5.5` only when the WorkOrder states one of:
+- high-impact architecture decision;
+- security-sensitive change;
+- data-loss or irreversible-state risk;
+- conflicting source-of-truth docs or review findings;
+- repeated failure on cheaper models;
+- a decision that materially constrains future system design.
+
+Do not use `gpt-5.5` for:
+- routine code edits;
+- docs-only updates;
+- normal test/lint failures;
+- broad file discovery;
+- small generic accuracy gains.
+
+Per-role escalation:
+- `analyst_architect`: escalate from `gpt-5.4-mini` to `gpt-5.4` for unclear architecture; use `gpt-5.5` only for high-impact architecture/security/data-risk decisions.
+- `programmer`: stay on `gpt-5.3-codex` for normal implementation; use `gpt-5.4` for subtle cross-module refactors; use `gpt-5.5` only after explicit high-risk or repeated-failure escalation.
+- `reviewer`: stay on `gpt-5.4` for normal review; use `gpt-5.5` only for security/data-loss/architecture-critical review or unresolved conflicting findings.
+- `verifier`: stay on `gpt-5.4-mini`; use `gpt-5.4` for deeper failure triage; avoid `gpt-5.5` unless ambiguous repeated failures carry high security/data-loss/architecture risk.
+
 ---
 
 ## 7. Parallelism Policy
@@ -227,4 +250,3 @@ Any agent must stop and return `blocked` when:
 - the role would need to perform another role's responsibility to continue.
 
 The root assistant then decides whether to ask the user, adjust scope, reassign, or keep the work local.
-
