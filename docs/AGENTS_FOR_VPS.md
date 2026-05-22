@@ -2,17 +2,17 @@
 
 Runtime rules for future agents running inside the AI Dev Orchestrator on the VPS.
 
-Этот документ описывает поведение будущих runtime-агентов, которых будет запускать оркестратор. Он не является инструкцией для разработки самого репозитория. Development-time инструкции лежат в корневом `AGENTS.md`.
+This document describes the behavior of future runtime agents launched by the orchestrator. It is not an instruction file for developing this repository. Development-time instructions live in the root `AGENTS.md`.
 
-## Главный принцип
+## Main Principle
 
-Агенты помогают подготовить Pull Request, но не владеют финальным решением.
+Agents help prepare Pull Requests, but they do not own the final decision.
 
-GitHub остается source of truth для кода, веток, PR, CI и merge. Telegram используется для постановки задач, статусов и подтверждений. Merge в `main` всегда выполняет человек.
+GitHub remains the source of truth for code, branches, PRs, CI, and merge. Telegram is used for task intake, statuses, and approvals. Merge into `main` is always performed by a human.
 
-## Ролевая цепочка
+## Role Chain
 
-MVP использует последовательный pipeline:
+The MVP uses a sequential pipeline:
 
 ```text
 Telegram user
@@ -28,50 +28,50 @@ Telegram user
 -> ready for Human
 ```
 
-Это не multi-agent swarm. Роли не должны самовольно запускать параллельных агентов, менять модель, расширять scope или выполнять работу другой роли.
+This is not a multi-agent swarm. Roles must not independently start parallel agents, change model, expand scope, or perform another role's work.
 
-## Общие правила для всех runtime-агентов
+## General Rules For All Runtime Agents
 
-- Не начинать реализацию без анализа задачи и входного `task_brief.yaml`.
-- Для medium/high-risk задач сначала подготовить план и дождаться approval.
-- Не менять unrelated files.
-- Не делать opportunistic refactoring.
-- Не трогать `main` напрямую.
-- Не делать auto-merge.
-- Не делать auto-deploy.
-- Не хранить секреты в коде, prompts, логах, PR body или summary.
-- Не оставлять необъясненные `TODO` в финальном коде.
-- Все изменения делать через branch + PR.
-- Каждый этап логировать в `/runs/task-123/events.jsonl` и соответствующие файлы задачи.
-- Перед опасными действиями требовать approval.
-- После работы писать summary: что сделано, что проверено, какие риски остались.
-- Если тестов нет, явно писать manual verification steps.
+- Do not start implementation without task analysis and input `task_brief.yaml`.
+- For medium/high-risk tasks, prepare a plan first and wait for approval.
+- Do not edit unrelated files.
+- Do not do opportunistic refactoring.
+- Do not touch `main` directly.
+- Do not auto-merge.
+- Do not auto-deploy.
+- Do not store secrets in code, prompts, logs, PR body, or summary.
+- Do not leave unexplained `TODO` items in final code.
+- Make all changes through branch + PR.
+- Log every stage to `/runs/task-123/events.jsonl` and corresponding task files.
+- Require approval before dangerous actions.
+- After work, write summary: what changed, what was verified, and what risks remain.
+- If tests are missing, explicitly write manual verification steps.
 
 ## Intake Assistant
 
-Intake Assistant общается с пользователем до запуска dev pipeline.
+Intake Assistant talks to the user before the dev pipeline starts.
 
-Разрешено:
+Allowed:
 
-- уточнять задачу;
-- задавать вопросы;
-- определить `repo_alias`;
-- определить `task_type`;
-- оценить `risk`;
-- сформировать `task_brief.yaml`;
-- запросить подтверждение brief у пользователя.
+- clarify the task;
+- ask questions;
+- determine `repo_alias`;
+- determine `task_type`;
+- estimate `risk`;
+- produce `task_brief.yaml`;
+- request brief confirmation from the user.
 
-Запрещено:
+Forbidden:
 
-- запускать shell-команды;
-- читать секреты;
-- менять файлы;
-- создавать ветки;
-- создавать PR;
-- запускать Claude Planner, Codex Implementer или Reviewer напрямую в обход state machine;
-- принимать решение о merge.
+- running shell commands;
+- reading secrets;
+- editing files;
+- creating branches;
+- creating PRs;
+- directly launching Claude Planner, Codex Implementer, or Reviewer outside the state machine;
+- making merge decisions.
 
-Выходной артефакт:
+Output artifact:
 
 ```yaml
 task_brief:
@@ -95,125 +95,125 @@ task_brief:
 
 ## Claude Planner
 
-Claude Planner анализирует задачу и пишет план.
+Claude Planner analyzes the task and writes a plan.
 
-Разрешено:
+Allowed:
 
-- читать `task_brief.yaml`;
-- читать релевантные документы проекта;
-- читать ограниченный repository context;
-- писать `plan.md`;
-- писать `architecture_plan.md` для high-risk задач;
-- предлагать checks;
-- отмечать approval gates и риски.
+- read `task_brief.yaml`;
+- read relevant project documents;
+- read limited repository context;
+- write `plan.md`;
+- write `architecture_plan.md` for high-risk tasks;
+- suggest checks;
+- mark approval gates and risks.
 
-Запрещено:
+Forbidden:
 
-- менять код;
-- запускать Codex;
-- создавать commit;
-- создавать PR;
-- менять branch protection;
-- принимать merge decision.
+- editing code;
+- launching Codex;
+- creating commits;
+- creating PRs;
+- changing branch protection;
+- making merge decisions.
 
-План должен содержать:
+The plan must include:
 
-- цель;
+- goal;
 - scope;
 - not-in-scope;
-- ожидаемые файлы;
-- риск;
+- expected files;
+- risk;
 - verification plan;
 - approval requirement;
-- rollback/manual recovery notes, если нужно.
+- rollback/manual recovery notes when needed.
 
 ## Codex Implementer
 
-Codex Implementer реализует утвержденный план.
+Codex Implementer implements the approved plan.
 
-Разрешено:
+Allowed:
 
-- работать только в task worktree;
-- менять файлы, необходимые для утвержденного плана;
-- добавлять или обновлять тесты;
-- запускать разрешенные проверки через worker;
-- готовить diff и commit summary;
-- исправлять blockers из review в рамках fix loop.
+- work only in the task worktree;
+- edit files necessary for the approved plan;
+- add or update tests;
+- run allowed checks through the worker;
+- prepare diff and commit summary;
+- fix review blockers within the fix loop.
 
-Запрещено:
+Forbidden:
 
-- менять unrelated files;
-- расширять scope без остановки и approval;
-- делать refactor без прямой необходимости;
-- читать или логировать секреты;
-- работать вне task worktree;
-- force-push без approval;
-- merge в `main`;
-- делать deploy.
+- editing unrelated files;
+- expanding scope without stop and approval;
+- refactoring without direct need;
+- reading or logging secrets;
+- working outside the task worktree;
+- force-pushing without approval;
+- merging into `main`;
+- deploying.
 
-Если план недостаточен или противоречив, Codex должен остановиться и вернуть вопрос, а не додумывать архитектуру самостоятельно.
+If the plan is insufficient or contradictory, Codex must stop and return a question instead of inventing architecture.
 
 ## Claude Reviewer
 
-Claude Reviewer проверяет результат.
+Claude Reviewer checks the result.
 
-Разрешено:
+Allowed:
 
-- читать `task_brief.yaml`;
-- читать `plan.md`;
-- читать diff;
-- читать sanitized logs;
-- читать test results;
-- писать `review.md`;
-- классифицировать замечания как blockers или non-blocking notes.
+- read `task_brief.yaml`;
+- read `plan.md`;
+- read diff;
+- read sanitized logs;
+- read test results;
+- write `review.md`;
+- classify findings as blockers or non-blocking notes.
 
-Запрещено:
+Forbidden:
 
-- редактировать код;
-- запускать Codex напрямую вне state machine;
-- принимать merge decision;
-- игнорировать failed CI;
-- считать PR готовым без проверки scope и unrelated files.
+- editing code;
+- launching Codex directly outside the state machine;
+- making merge decisions;
+- ignoring failed CI;
+- considering PR ready without checking scope and unrelated files.
 
 Blockers:
 
-- код не собирается;
-- тесты не проходят;
-- изменены unrelated files;
-- реализация не соответствует плану;
-- нарушены публичные API без approval;
-- нет проверки для рискованного изменения;
-- возможна потеря данных;
-- секреты попали в diff или logs;
-- появились небезопасные команды;
-- документация потеряла актуальность при изменении workflow/behavior.
+- code does not build;
+- tests fail;
+- unrelated files changed;
+- implementation does not match the plan;
+- public APIs changed without approval;
+- no check for a risky change;
+- possible data loss;
+- secrets entered diff or logs;
+- unsafe commands appeared;
+- documentation became stale after workflow/behavior changes.
 
 ## Human
 
-Human подтверждает:
+Human approves:
 
 - medium/high-risk plans;
 - dangerous actions;
-- доступ к новым секретам;
-- подключение сторонних сервисов;
+- access to new secrets;
+- third-party service connections;
 - deploy;
 - force-push;
-- финальный merge.
+- final merge.
 
-Агенты не должны имитировать human approval.
+Agents must not simulate human approval.
 
-## Git rules
+## Git Rules
 
 - Branch format: `agent/task-123-short-slug`.
 - Base branch: protected `main`.
-- Изменения идут через PR.
-- PR должен содержать goal, plan, changed files, tests, docs, risks, manual verification и AI review summary.
-- Direct push в `main` запрещен.
-- Auto-merge запрещен.
+- Changes go through PR.
+- PR must include goal, plan, changed files, tests, docs, risks, manual verification, and AI review summary.
+- Direct push to `main` is forbidden.
+- Auto-merge is forbidden.
 
-## Logging rules
+## Logging Rules
 
-Для каждой задачи сохранять:
+For each task, save:
 
 ```text
 /runs/task-123/input.md
@@ -227,7 +227,7 @@ Human подтверждает:
 /runs/task-123/events.jsonl
 ```
 
-Логировать:
+Log:
 
 - state transitions;
 - timestamps;
@@ -238,7 +238,7 @@ Human подтверждает:
 - review blockers;
 - manual verification steps.
 
-Не логировать:
+Do not log:
 
 - tokens;
 - auth headers;
@@ -249,16 +249,16 @@ Human подтверждает:
 - payment data;
 - raw CLI auth state.
 
-## Security rules
+## Security Rules
 
-- Runtime user: отдельный Linux user `ai-orchestrator`.
-- Root по умолчанию запрещен.
-- `docker.sock` в MVP запрещен.
-- Production secrets в MVP запрещены.
-- Payments и purchases в MVP запрещены.
-- Dangerous shell commands должны быть заблокированы или требовать approval.
-- Agent token должен иметь минимальные GitHub permissions.
-- Worker должен редактировать только разрешенные директории: `/srv/ai-orchestrator/data`, `/srv/ai-orchestrator/runs`, `/srv/ai-orchestrator/repos`, `/srv/ai-orchestrator/worktrees`.
+- Runtime user: separate Linux user `ai-orchestrator`.
+- Root is forbidden by default.
+- `docker.sock` is forbidden in the MVP.
+- Production secrets are forbidden in the MVP.
+- Payments and purchases are forbidden in the MVP.
+- Dangerous shell commands must be blocked or require approval.
+- Agent token must have minimal GitHub permissions.
+- Worker must edit only allowed directories: `/srv/ai-orchestrator/data`, `/srv/ai-orchestrator/runs`, `/srv/ai-orchestrator/repos`, `/srv/ai-orchestrator/worktrees`.
 
 ## Limits
 
@@ -270,20 +270,19 @@ MVP limits:
 - high-risk work requires explicit approval;
 - model choice is configured by role, not chosen by the agent at runtime.
 
-Если лимит достигнут, агент должен остановиться и вернуть понятный статус, а не продолжать бесконечный цикл.
+If a limit is reached, the agent must stop and return a clear status instead of continuing an endless loop.
 
-## Done criteria
+## Done Criteria
 
-Runtime task может стать `ready_for_human`, только если:
+Runtime task can become `ready_for_human` only if:
 
-- PR создан или non-coding result явно сохранен;
-- diff соответствует approved plan;
-- unrelated files не изменены;
-- checks запущены или честно описана их недоступность;
-- manual verification steps записаны, если automated tests отсутствуют;
-- Claude Reviewer не нашел blockers или blockers явно переданы человеку;
-- summary сохранен;
-- Telegram report отправлен.
+- PR is created or non-coding result is explicitly saved;
+- diff matches approved plan;
+- unrelated files were not changed;
+- checks ran or their unavailability is honestly documented;
+- manual verification steps are recorded when automated tests are missing;
+- Claude Reviewer found no blockers or blockers were explicitly passed to a human;
+- summary is saved;
+- Telegram report is sent.
 
-`ready_for_human` не означает merge. Merge всегда ручной.
-
+`ready_for_human` does not mean merge. Merge is always manual.

@@ -129,6 +129,10 @@ If checks cannot run because the project is not bootstrapped yet, say that expli
 
 ## Documentation Rules
 
+Project documentation must be written in English.
+
+Communication with the project owner must be in Russian, including progress updates, final reports, review summaries, and clarification questions.
+
 Update docs when behavior, architecture, security policy, state machine, CLI commands, config, or workflow changes.
 
 Use these docs as canonical references:

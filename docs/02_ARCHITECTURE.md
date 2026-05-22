@@ -1,6 +1,6 @@
 # 02 Architecture
 
-## Общая схема
+## Overall Flow
 
 ```text
 Telegram task
@@ -16,137 +16,136 @@ Telegram task
 -> manual merge
 ```
 
-## Компоненты
+## Components
 
 ### Telegram Bot
 
-- Ответственность: принимает команды пользователя и отправляет уведомления.
-- Входы: `/task`, `/status`, `/log`, `/approve`, `/reject`, `/cancel`, `/help`.
-- Выходы: записи в SQLite, events, Telegram messages.
-- Не должен делать: запускать shell-команды, хранить секреты в сообщениях, принимать merge decisions.
-- Риски: spoofing пользователя, потеря контекста, слишком длинные сообщения.
-- MVP: один разрешенный Telegram user id, polling или webhook, минимальные команды.
-- Позже: multiple users, roles, inline buttons, richer status cards.
+- Responsibility: accept user commands and send notifications.
+- Inputs: `/task`, `/status`, `/log`, `/approve`, `/reject`, `/cancel`, `/help`.
+- Outputs: SQLite records, events, Telegram messages.
+- Must not: run shell commands, store secrets in messages, make merge decisions.
+- Risks: user spoofing, context loss, overly long messages.
+- MVP: one allowed Telegram user id, polling or webhook, minimal commands.
+- Later: multiple users, roles, inline buttons, richer status cards.
 
 ### API/Worker Process
 
-- Ответственность: основной glue-layer и state machine.
-- Входы: задачи из SQLite, approvals, cancel events.
-- Выходы: запуски git, Claude, Codex, tests, GitHub PR, notifications.
-- Не должен делать: обходить security gates, выполнять неразрешенные destructive команды.
-- Риски: зависшие subprocess, partial failure, race conditions.
-- MVP: один worker loop, блокировка задачи на время выполнения.
-- Позже: очередь, retries, parallel workers, supervisor.
+- Responsibility: main glue layer and state machine.
+- Inputs: tasks from SQLite, approvals, cancel events.
+- Outputs: git, Claude, Codex, tests, GitHub PR, notifications.
+- Must not: bypass security gates or execute unauthorized destructive commands.
+- Risks: stuck subprocesses, partial failures, race conditions.
+- MVP: one worker loop, task lock while running.
+- Later: queue, retries, parallel workers, supervisor.
 
 ### SQLite Database
 
-- Ответственность: хранение task state, approvals, events, paths, PR metadata.
-- Входы: команды bot и worker events.
-- Выходы: состояние для `/status`, worker loop и audit.
-- Не должен делать: хранить секреты и полные agent prompts с credentials.
-- Риски: corruption при неправильных concurrent writes, отсутствие backups.
-- MVP: локальный файл `/data/tasks.sqlite`, WAL mode, простые migrations.
-- Позже: PostgreSQL, retention policy, task search.
+- Responsibility: store task state, approvals, events, paths, and PR metadata.
+- Inputs: bot commands and worker events.
+- Outputs: state for `/status`, worker loop, and audit.
+- Must not: store secrets or full agent prompts containing credentials.
+- Risks: corruption from incorrect concurrent writes, no backups.
+- MVP: local `/data/tasks.sqlite`, WAL mode, simple migrations.
+- Later: PostgreSQL, retention policy, task search.
 
 ### GitHub Integration
 
-- Ответственность: push branch, create PR, read CI status, labels, comments.
-- Входы: branch, commit, PR body, labels.
-- Выходы: PR URL, CI status, review status.
-- Не должен делать: merge в `main`, менять protected rules без approval.
-- Риски: token scope слишком широкий, rate limits, auth failure.
-- MVP: GitHub CLI `gh` с scoped token или GitHub App.
-- Позже: GitHub App installation tokens, richer PR automation.
+- Responsibility: push branch, create PR, read CI status, labels, comments.
+- Inputs: branch, commit, PR body, labels.
+- Outputs: PR URL, CI status, review status.
+- Must not: merge into `main` or change protected rules without approval.
+- Risks: overly broad token scope, rate limits, auth failure.
+- MVP: GitHub CLI `gh` with scoped token.
+- Later: GitHub App installation tokens, richer PR automation.
 
 ### Repository Manager
 
-- Ответственность: clone/fetch базового репозитория, проверка clean state.
-- Входы: repository config, default branch.
-- Выходы: локальный путь repo cache, актуальный `origin/main`.
-- Не должен делать: писать в worktree задачи напрямую.
-- Риски: stale refs, поврежденный local clone, конфликт remote.
-- MVP: `git fetch`, проверка remote URL, отдельная папка `/repos/<repo>`.
-- Позже: multiple repositories, shallow clone policy, cache repair.
+- Responsibility: clone/fetch base repository and verify clean state.
+- Inputs: repository config, default branch.
+- Outputs: local repo cache path, current `origin/main`.
+- Must not: write directly into the task worktree.
+- Risks: stale refs, corrupted local clone, remote conflicts.
+- MVP: `git fetch`, remote URL check, separate `/repos/<repo>` directory.
+- Later: multiple repositories, shallow clone policy, cache repair.
 
 ### Worktree Manager
 
-- Ответственность: создавать и удалять task worktree.
-- Входы: task_id, base ref, branch name.
-- Выходы: path `/worktrees/task-123`.
-- Не должен делать: reuse worktree между задачами.
-- Риски: leftover locks, uncommitted changes, path traversal.
+- Responsibility: create and remove task worktrees.
+- Inputs: task_id, base ref, branch name.
+- Outputs: `/worktrees/task-123` path.
+- Must not: reuse worktrees between tasks.
+- Risks: leftover locks, uncommitted changes, path traversal.
 - MVP: `git worktree add -b <branch> <path> origin/main`.
-- Позже: cleanup policy, disk quotas, archival snapshots.
+- Later: cleanup policy, disk quotas, archival snapshots.
 
 ### Claude Runner
 
-- Ответственность: planning, architecture analysis, review.
-- Входы: task input, repository context, docs, diff.
-- Выходы: `plan.md`, `architecture_plan.md`, `review.md`, blocker list.
-- Не должен делать: менять файлы реализации в MVP, принимать merge decisions.
-- Риски: неверная оценка риска, слишком общий план, hallucinated files.
-- MVP: subprocess wrapper вокруг Claude Code CLI, сохранение stdout/stderr.
-- Позже: structured JSON output, prompt templates, multi-pass review.
+- Responsibility: planning, architecture analysis, review.
+- Inputs: task input, repository context, docs, diff.
+- Outputs: `plan.md`, `architecture_plan.md`, `review.md`, blocker list.
+- Must not: edit implementation files in the MVP or make merge decisions.
+- Risks: wrong risk estimate, overly generic plan, hallucinated files.
+- MVP: subprocess wrapper around Claude Code CLI with stdout/stderr persistence.
+- Later: structured JSON output, prompt templates, multi-pass review.
 
 ### Codex Runner
 
-- Ответственность: реализация утвержденного плана и fix loop.
-- Входы: `plan.md`, task context, review blockers.
-- Выходы: diff, tests, commit summary, fix log.
-- Не должен делать: менять unrelated files, обходить plan approval, merge.
-- Риски: чрезмерный diff, opportunistic refactor, broken build.
-- MVP: subprocess wrapper вокруг Codex CLI в task worktree.
-- Позже: sandbox profiles, diff budget, model selection.
+- Responsibility: implement the approved plan and fix review blockers.
+- Inputs: `plan.md`, task context, review blockers.
+- Outputs: diff, tests, commit summary, fix log.
+- Must not: modify unrelated files, bypass plan approval, or merge.
+- Risks: excessive diff, opportunistic refactor, broken build.
+- MVP: subprocess wrapper around Codex CLI inside the task worktree.
+- Later: sandbox profiles, diff budget, model selection.
 
 ### CI Watcher
 
-- Ответственность: получить статус CI для PR или commit.
-- Входы: PR URL, commit SHA.
-- Выходы: success/failure/pending, details URL.
-- Не должен делать: считать PR готовым без проверок или manual verification note.
-- Риски: flaky CI, missing CI, timeout.
-- MVP: `gh pr checks` с timeout.
-- Позже: GitHub Checks API, retries, flaky detection.
+- Responsibility: get CI status for the PR or commit.
+- Inputs: PR URL, commit SHA.
+- Outputs: success/failure/pending, details URL.
+- Must not: mark a PR ready without checks or manual verification note.
+- Risks: flaky CI, missing CI, timeout.
+- MVP: `gh pr checks` with timeout.
+- Later: GitHub Checks API, retries, flaky detection.
 
 ### Review Runner
 
-- Ответственность: Claude review и optional CodeRabbit status.
-- Входы: PR diff, test logs, plan.
-- Выходы: `review.md`, blockers, non-blocking notes.
-- Не должен делать: auto-approve merge.
-- Риски: false positives, duplicated comments, review loop без лимита.
-- MVP: один Claude review pass, один fix loop при blockers.
-- Позже: multiple reviewers, severity taxonomy, review memory.
+- Responsibility: Claude review and optional CodeRabbit status.
+- Inputs: PR diff, test logs, plan.
+- Outputs: `review.md`, blockers, non-blocking notes.
+- Must not: auto-approve merge.
+- Risks: false positives, duplicated comments, unlimited review loop.
+- MVP: one Claude review pass, one fix loop for blockers.
+- Later: multiple reviewers, severity taxonomy, review memory.
 
 ### Notification Service
 
-- Ответственность: отправка Telegram-сообщений о статусах.
-- Входы: task events, PR URL, failures.
-- Выходы: короткие Telegram messages.
-- Не должен делать: отправлять секреты, большие логи целиком.
-- Риски: spam, message length limits, missed notification.
-- MVP: compact status messages и `/log` для последних строк.
-- Позже: inline approvals, digest, attachments.
+- Responsibility: send Telegram status messages.
+- Inputs: task events, PR URL, failures.
+- Outputs: short Telegram messages.
+- Must not: send secrets or entire large logs.
+- Risks: spam, message length limits, missed notification.
+- MVP: compact status messages and `/log` for recent lines.
+- Later: inline approvals, digest, attachments.
 
 ### Logs Storage
 
-- Ответственность: хранение файлов запуска и events.
-- Входы: task input, plan, agent logs, test logs, review.
-- Выходы: audit trail и debug artifacts.
-- Не должен делать: хранить raw secrets, full env dumps, auth headers.
-- Риски: утечка секретов, неконтролируемый рост диска.
-- MVP: `/runs/task-123/*` и redaction before write.
-- Позже: rotation, compression, external log sink.
+- Responsibility: store run files and events.
+- Inputs: task input, plan, agent logs, test logs, review.
+- Outputs: audit trail and debug artifacts.
+- Must not: store raw secrets, full env dumps, auth headers.
+- Risks: secret leakage, uncontrolled disk growth.
+- MVP: `/runs/task-123/*` and redaction before write.
+- Later: rotation, compression, external log sink.
 
-## Минимальная MVP-развертка
+## Minimal MVP Deployment
 
-- Один Linux VPS.
-- Один Linux user `ai-orchestrator`.
-- Python worker под systemd или Docker Compose.
-- SQLite на локальном диске.
+- One Linux VPS.
+- One Linux user `ai-orchestrator`.
+- Python worker under systemd.
+- SQLite on local disk.
 - GitHub CLI `gh`.
 - Git.
 - Claude Code CLI.
 - Codex CLI.
-- Файловые директории: `/repos`, `/worktrees`, `/runs`, `/data`.
-
+- File directories: `/repos`, `/worktrees`, `/runs`, `/data`.

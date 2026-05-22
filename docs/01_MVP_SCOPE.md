@@ -1,60 +1,61 @@
 # 01 MVP Scope
 
-## Цель MVP
+## MVP Goal
 
-Собрать минимальную систему, которую можно поднять на арендованном Linux VPS и использовать для полного цикла: Telegram task -> planning -> implementation -> checks -> Pull Request -> Telegram report.
+Build the smallest system that can run on a rented Linux VPS and support the full cycle: Telegram task -> planning -> implementation -> checks -> Pull Request -> Telegram report.
 
-MVP не должен быть универсальной агентной платформой. Он должен быть маленьким, понятным и проверяемым.
+The MVP must not become a general-purpose agent platform. It must stay small, understandable, and auditable.
 
-## MVP должен уметь
+## MVP Must Be Able To
 
-- Принимать задачу из Telegram через `/task`.
-- Создавать уникальный `task_id`.
-- Сохранять задачу, статус и метаданные в SQLite.
-- Определять минимальный тип задачи: small, medium, large/risky, documentation, research.
-- Создавать feature branch вида `agent/task-123-short-slug`.
-- Создавать отдельный git worktree под задачу.
-- Запускать Claude planning step.
-- Сохранять план в `/runs/task-123/plan.md`.
-- Для medium/high risk задач переводить задачу в `waiting_plan_approval`.
-- Запускать Codex implementation step после плана или approval.
-- Сохранять stdout/stderr и structured events.
-- Запускать build/test/lint commands, если они настроены для репозитория.
-- Фиксировать отсутствие тестов и manual verification steps.
-- Делать commit в feature branch.
-- Push feature branch.
-- Создавать PR через `gh pr create` или GitHub API.
-- Отправлять Telegram-отчет со статусом, summary, проверками и ссылкой на PR.
-- Не мержить автоматически.
+- Accept a task from Telegram through `/task`.
+- Create a unique `task_id`.
+- Store task input, status, and metadata in SQLite.
+- Determine a minimal task type: small, medium, large/risky, documentation, research.
+- Create a feature branch like `agent/task-123-short-slug`.
+- Create a separate git worktree for the task.
+- Run the Claude planning step.
+- Save the plan to `/runs/task-123/plan.md`.
+- Move medium/high-risk tasks to `waiting_plan_approval`.
+- Run the Codex implementation step after the plan or approval.
+- Store stdout/stderr and structured events.
+- Run build/test/lint commands when configured for the repository.
+- Record missing tests and manual verification steps.
+- Create a commit in the feature branch.
+- Push the feature branch.
+- Create a PR through `gh pr create` or the GitHub API.
+- Send a Telegram report with status, summary, checks, and PR link.
+- Never merge automatically.
 
-## Минимальные сущности MVP
+## Minimal MVP Entities
 
-- `Task`: исходная задача, статус, риск, репозиторий, ветка, worktree, PR URL.
-- `Run`: попытка выполнения задачи.
-- `Event`: лог изменения состояния.
-- `Approval`: решение пользователя по плану или опасному действию.
-- `CheckResult`: результат build/test/lint/CI/review.
+- `Task`: original task, status, risk, repository, branch, worktree, PR URL.
+- `Run`: an attempt to execute a task.
+- `Event`: a state-change log.
+- `Approval`: a user decision on a plan or dangerous action.
+- `CheckResult`: build/test/lint/CI/review result.
 
-## MVP не обязан уметь
+## MVP Does Not Need To Support
 
-- Сложный web UI.
+- Complex web UI.
 - Voice input.
 - Life assistant.
-- Покупки и платежи.
+- Purchases and payments.
 - Browser automation.
 - Auto-deploy.
 - Auto-merge.
 - Kubernetes.
-- Temporal или другой workflow engine.
+- Temporal or another workflow engine.
 - Multi-agent swarm.
-- Сложная аналитика стоимости.
-- Поддержка многих пользователей.
-- Полноценный RBAC.
-- Управление production secrets.
+- Complex cost analytics.
+- Multiple-user support.
+- Full RBAC.
+- Production secret management.
 
-## Границы MVP
+## MVP Boundaries
 
-MVP может быть однопроцессным приложением с SQLite и файловыми логами. Допустимо использовать systemd service или Docker Compose. Главный критерий - надежный end-to-end путь для одной задачи в одном репозитории.
+The MVP may be a single-process application with SQLite and file logs. The first runtime target is a `systemd` service. The main criterion is a reliable end-to-end path for one task in one repository.
 
-Если в проекте нет тестов или CI, MVP не должен притворяться, что проверка пройдена. Он обязан явно писать: automated checks unavailable, manual verification required.
+Docker Compose is not part of the first MVP and remains a future option if extra isolation or reproducible runtime becomes necessary after Phase 7.
 
+If a project has no tests or CI, the MVP must not pretend that checks passed. It must explicitly write: automated checks unavailable, manual verification required.

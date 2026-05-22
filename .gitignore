@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+
+# Local secrets and CLI auth state
+.env
+.env.*
+!.env.example
+.anthropic/
+.codex/auth.json
+.codex/session*
+
+# Runtime artifacts
+/data/
+/runs/
+/repos/
+/worktrees/
+*.sqlite
+*.sqlite3
+*.db
+*.log

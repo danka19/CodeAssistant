@@ -1,50 +1,50 @@
 # 13 MVP Acceptance Criteria
 
-MVP считается готовым, когда выполнены все критерии ниже.
+The MVP is ready when all criteria below are met.
 
-## End-to-end criteria
+## End-To-End Criteria
 
-- Я могу отправить `/task` в Telegram.
-- Система создает задачу в базе.
-- Система присваивает `task_id`.
-- Система создает branch.
-- Система создает git worktree.
-- Claude создает `plan.md`.
-- Для крупной задачи есть approval перед реализацией.
-- Codex делает изменение в тестовом репозитории.
-- Система запускает configured checks или явно пишет, что автоматических проверок нет.
-- Система создает PR.
-- Telegram присылает ссылку на PR.
-- Main защищен от прямого merge.
-- Логи доступны в `/runs/task-123`.
-- При ошибке задача получает `failed` и понятную причину.
-- Merge остается ручным.
+- I can send `/task` in Telegram.
+- The system creates a task in the database.
+- The system assigns `task_id`.
+- The system creates a branch.
+- The system creates a git worktree.
+- Claude creates `plan.md`.
+- Large tasks have approval before implementation.
+- Codex makes a change in the test repository.
+- The system runs configured checks or explicitly states that automated checks are unavailable.
+- The system creates a PR.
+- Telegram sends the PR link.
+- Main is protected from direct merge.
+- Logs are available in `/runs/task-123`.
+- On failure, the task receives `failed` and a clear reason.
+- Merge remains manual.
 
-## Documentation criteria
+## Documentation Criteria
 
-- Есть `AGENTS.md`.
-- Описан Telegram bot.
-- Описан VPS worker.
-- Описан GitHub PR flow.
-- Описаны роли Claude/Codex/CodeRabbit/Human.
-- Описаны security gates.
-- Описаны task states.
-- Описаны logs.
-- Описаны CI/review gates.
-- Описаны риски и ограничения.
+- `AGENTS.md` exists.
+- Telegram bot is documented.
+- VPS worker is documented.
+- GitHub PR flow is documented.
+- Claude/Codex/CodeRabbit/Human roles are documented.
+- Security gates are documented.
+- Task states are documented.
+- Logs are documented.
+- CI/review gates are documented.
+- Risks and limitations are documented.
 
-## Security criteria
+## Security Criteria
 
-- Worker работает не под root.
-- Agent token не может push в `main`.
-- Secrets не попадают в git.
-- Secrets не попадают в logs.
-- Dangerous commands требуют approval или блокируются.
-- Production deploy и payments отсутствуют в MVP.
+- Worker does not run as root.
+- Agent token cannot push to `main`.
+- Secrets do not enter git.
+- Secrets do not enter logs.
+- Dangerous commands require approval or are blocked.
+- Production deploy and payments are absent from the MVP.
 
-## Failure criteria
+## Failure Criteria
 
-MVP должен корректно обрабатывать:
+The MVP must correctly handle:
 
 - GitHub auth failure;
 - Claude failure;
@@ -55,5 +55,4 @@ MVP должен корректно обрабатывать:
 - missing CI;
 - no tests configured.
 
-Корректная обработка означает: статус задачи обновлен, причина записана, пользователь получил Telegram notification.
-
+Correct handling means: task status is updated, reason is recorded, and the user receives a Telegram notification.

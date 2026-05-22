@@ -2,158 +2,158 @@
 
 ## Phase 0 - Project Bootstrap
 
-Цель: создать основу репозитория и правила работы.
+Goal: create the repository foundation and working rules.
 
-Реализовать:
+Implement:
 
-- создать репозиторий;
-- добавить `AGENTS.md`;
-- добавить базовую документацию;
-- выбрать Python stack;
-- настроить `config.example.yaml`;
-- подготовить `README.md`.
+- create repository;
+- add `AGENTS.md`;
+- add baseline documentation;
+- choose Python stack;
+- configure `config.example.yaml`;
+- prepare `README.md`.
 
-Критерии готовности:
+Readiness criteria:
 
-- docs описывают MVP path;
-- есть правила для агентов;
-- структура проекта согласована;
-- первый PR можно review вручную.
+- docs describe the MVP path;
+- agent rules exist;
+- project structure is agreed;
+- first PR can be reviewed manually.
 
-Риски:
+Risks:
 
-- слишком широкий scope;
-- смешение MVP и future expansion.
+- scope too broad;
+- mixing MVP and future expansion.
 
-Не делать:
+Do not do:
 
-- production-код worker;
+- production worker code;
 - Kubernetes;
-- сложный UI.
+- complex UI.
 
 ## Phase 1 - Telegram Intake
 
-Цель: принимать задачи и сохранять их.
+Goal: accept tasks and store them.
 
-Реализовать:
+Implement:
 
 - Telegram bot;
 - `/task`;
 - `/status`;
-- SQLite schema для tasks/events;
+- SQLite schema for tasks/events;
 - allowed user id;
-- базовые notifications.
+- basic notifications.
 
-Критерии готовности:
+Readiness criteria:
 
-- `/task` создает task в SQLite;
-- `/status task-123` возвращает состояние;
-- unauthorized user блокируется.
+- `/task` creates a task in SQLite;
+- `/status task-123` returns state;
+- unauthorized user is blocked.
 
-Риски:
+Risks:
 
-- неправильная обработка длинных сообщений;
-- секреты в config.
+- incorrect long-message handling;
+- secrets in config.
 
-Не делать:
+Do not do:
 
 - worktree;
-- запуск Claude/Codex;
+- Claude/Codex launch;
 - inline UI.
 
 ## Phase 2 - GitHub/Repo Manager
 
-Цель: подготовить branch и worktree.
+Goal: prepare branch and worktree.
 
-Реализовать:
+Implement:
 
 - GitHub auth;
 - repo clone/fetch;
 - branch creation;
 - git worktree;
-- базовые логи;
+- baseline logs;
 - path safety checks.
 
-Критерии готовности:
+Readiness criteria:
 
-- task получает branch `agent/task-123-short-slug`;
-- создается отдельный worktree;
-- events фиксируют команды и exit codes.
+- task receives branch `agent/task-123-short-slug`;
+- separate worktree is created;
+- events record commands and exit codes.
 
-Риски:
+Risks:
 
 - stale base branch;
-- конфликт имен веток;
-- лишние permissions у токена.
+- branch name conflict;
+- excessive token permissions.
 
-Не делать:
+Do not do:
 
 - PR creation;
 - agent implementation.
 
 ## Phase 3 - Claude Planning
 
-Цель: получить план до реализации.
+Goal: get a plan before implementation.
 
-Реализовать:
+Implement:
 
-- запуск Claude для `plan.md`;
-- сохранение plan в `/runs/task-123/plan.md`;
+- run Claude for `plan.md`;
+- save plan to `/runs/task-123/plan.md`;
 - Telegram notification;
-- approval для medium/high risk;
-- `/approve` и `/reject`.
+- approval for medium/high risk;
+- `/approve` and `/reject`.
 
-Критерии готовности:
+Readiness criteria:
 
-- small task идет дальше без approval;
-- medium/high risk ждет approval;
-- rejected plan фиксируется.
+- small task proceeds without approval;
+- medium/high risk waits for approval;
+- rejected plan is recorded.
 
-Риски:
+Risks:
 
-- слишком общий план;
-- неверная risk classification.
+- overly generic plan;
+- wrong risk classification.
 
-Не делать:
+Do not do:
 
-- автоматическую реализацию high risk без approval;
-- сложный prompt management.
+- automatic high-risk implementation without approval;
+- complex prompt management.
 
 ## Phase 4 - Codex Implementation
 
-Цель: реализовать утвержденный план.
+Goal: implement the approved plan.
 
-Реализовать:
+Implement:
 
-- запуск Codex по `plan.md`;
-- сохранение `implementation.log`;
+- run Codex using `plan.md`;
+- save `implementation.log`;
 - `git diff`;
 - `git status`;
-- запуск configured checks;
+- run configured checks;
 - commit.
 
-Критерии готовности:
+Readiness criteria:
 
-- Codex меняет файлы только в worktree;
-- diff сохраняется в summary;
-- commit создается в task branch.
+- Codex edits files only inside worktree;
+- diff is saved in summary;
+- commit is created in task branch.
 
-Риски:
+Risks:
 
 - unrelated changes;
 - broken build;
 - runaway agent.
 
-Не делать:
+Do not do:
 
-- auto-push в `main`;
+- auto-push to `main`;
 - silent test skip.
 
 ## Phase 5 - PR Creation
 
-Цель: создать PR и отправить ссылку.
+Goal: create PR and send the link.
 
-Реализовать:
+Implement:
 
 - push branch;
 - `gh pr create`;
@@ -161,55 +161,55 @@
 - labels;
 - Telegram PR URL.
 
-Критерии готовности:
+Readiness criteria:
 
-- PR создается из feature branch в `main`;
-- PR body содержит plan/tests/risks/manual verification;
-- Telegram получает ссылку.
+- PR is created from feature branch into `main`;
+- PR body contains plan/tests/risks/manual verification;
+- Telegram receives the link.
 
-Риски:
+Risks:
 
 - auth failure;
-- PR без полезного описания.
+- PR without useful description.
 
-Не делать:
+Do not do:
 
 - merge;
 - release/deploy.
 
 ## Phase 6 - CI/Review
 
-Цель: проверить PR перед human review.
+Goal: check PR before human review.
 
-Реализовать:
+Implement:
 
-- ожидание CI;
+- wait for CI;
 - Claude review;
 - optional CodeRabbit status;
 - needs_fix loop;
 - review summary.
 
-Критерии готовности:
+Readiness criteria:
 
-- failed CI не помечается ready;
-- blockers ведут к fix loop или `needs_fix`;
-- успешный PR получает `ready_for_human`.
+- failed CI is not marked ready;
+- blockers lead to fix loop or `needs_fix`;
+- successful PR receives `ready_for_human`.
 
-Риски:
+Risks:
 
 - flaky CI;
-- бесконечный fix loop.
+- endless fix loop.
 
-Не делать:
+Do not do:
 
-- требовать CodeRabbit как обязательный dependency MVP;
+- require CodeRabbit as a mandatory MVP dependency;
 - auto-approve.
 
 ## Phase 7 - MVP Hardening
 
-Цель: сделать MVP устойчивым для реального использования.
+Goal: make the MVP reliable for real use.
 
-Реализовать:
+Implement:
 
 - retries;
 - cancellation;
@@ -218,24 +218,23 @@
 - redaction;
 - security checks;
 - documentation updates;
-- backup для SQLite.
+- SQLite backup.
 
-Критерии готовности:
+Readiness criteria:
 
-- понятные ошибки;
-- task не зависает без статуса;
-- logs пригодны для debug;
-- security gates работают.
+- errors are understandable;
+- task does not hang without status;
+- logs are useful for debugging;
+- security gates work.
 
-Риски:
+Risks:
 
-- рост сложности;
-- попытка превратить MVP в платформу.
+- complexity growth;
+- attempt to turn MVP into a platform.
 
-Не делать:
+Do not do:
 
 - distributed workers;
 - web dashboard;
 - life assistant;
 - production deploy automation.
-

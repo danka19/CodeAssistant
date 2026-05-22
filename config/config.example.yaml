@@ -1,0 +1,67 @@
+# Example configuration for the AI Dev Orchestrator MVP.
+# This file is safe to commit because it contains placeholders only.
+# Store real secrets in a systemd environment file outside git.
+
+runtime:
+  mode: systemd
+  user: ai-orchestrator
+  root_dir: /srv/ai-orchestrator
+  data_dir: /srv/ai-orchestrator/data
+  runs_dir: /srv/ai-orchestrator/runs
+  repos_dir: /srv/ai-orchestrator/repos
+  worktrees_dir: /srv/ai-orchestrator/worktrees
+
+telegram:
+  # The real bot token must come from the environment, not this file.
+  bot_token_env: TELEGRAM_BOT_TOKEN
+  allowed_user_ids: []
+
+github:
+  # Fine-grained Personal Access Token, stored outside git.
+  token_env: GITHUB_TOKEN
+  default_owner: danka19
+  pr_base_branch: main
+
+agents:
+  intake_assistant:
+    enabled: true
+    write_access: false
+  claude_planner:
+    command: claude
+    write_access: false
+  codex_implementer:
+    command: codex
+    write_access: worktree
+  claude_reviewer:
+    command: claude
+    write_access: false
+
+limits:
+  max_concurrent_implementers_per_repo: 1
+  max_fix_attempts: 2
+  command_timeout_seconds: 1800
+
+repositories:
+  codeassistant:
+    repo: danka19/CodeAssistant
+    default_branch: main
+    purpose: orchestrator_self_development
+    local_path: /srv/ai-orchestrator/repos/codeassistant
+    worktree_root: /srv/ai-orchestrator/worktrees/codeassistant
+    test_commands:
+      - python -m compileall src tests
+      - python -m pytest -q
+      - python -m ruff check .
+      - python -m ruff format --check .
+
+  sandbox-py:
+    repo: danka19/ai-orchestrator-sandbox
+    default_branch: main
+    purpose: safe_end_to_end_test_repository
+    local_path: /srv/ai-orchestrator/repos/sandbox-py
+    worktree_root: /srv/ai-orchestrator/worktrees/sandbox-py
+    test_commands:
+      - python -m compileall src tests
+      - python -m pytest -q
+      - python -m ruff check .
+      - python -m ruff format --check .

@@ -1,16 +1,16 @@
 # 07 VPS Worker Spec
 
-## Стек MVP
+## MVP Stack
 
 - Python.
-- `python-telegram-bot` или `aiogram`.
+- `python-telegram-bot` or `aiogram`.
 - SQLite.
 - `subprocess`.
 - GitHub CLI `gh`.
 - `git`.
-- systemd или Docker Compose.
+- systemd.
 
-## Предложенная структура проекта
+## Proposed Project Structure
 
 ```text
 /src/bot.py
@@ -30,57 +30,57 @@
 /worktrees/
 ```
 
-## Ответственность файлов
+## File Responsibilities
 
 ### `/src/bot.py`
 
-Telegram command handlers. Принимает команды, валидирует user id, пишет задачи и approvals в SQLite, отправляет короткие ответы.
+Telegram command handlers. Accepts commands, validates user id, writes tasks and approvals to SQLite, sends short responses.
 
 ### `/src/worker.py`
 
-Основной loop state machine. Забирает queued tasks, вызывает managers/runners, меняет статусы, обрабатывает ошибки и cancellation.
+Main state-machine loop. Takes queued tasks, calls managers/runners, changes statuses, handles errors and cancellation.
 
 ### `/src/db.py`
 
-SQLite schema, migrations, CRUD для tasks, events, approvals, runs, check results.
+SQLite schema, migrations, CRUD for tasks, events, approvals, runs, and check results.
 
 ### `/src/config.py`
 
-Загрузка конфигурации из env и `/config/config.yaml`. Не логирует секреты.
+Loads configuration from env and `/config/config.yaml`. Does not log secrets.
 
 ### `/src/github_client.py`
 
-Обертка над `gh` или GitHub API: create PR, add labels, read checks, fetch PR URL.
+Wrapper around `gh` or GitHub API: create PR, add labels, read checks, fetch PR URL.
 
 ### `/src/repo_manager.py`
 
-Clone/fetch repository cache, проверка remote, base branch, clean state.
+Clone/fetch repository cache, validate remote, base branch, and clean state.
 
 ### `/src/worktree_manager.py`
 
-Создание branch/worktree, проверка path safety, cleanup по явному запросу.
+Branch/worktree creation, path safety checks, cleanup on explicit request.
 
 ### `/src/agent_runner.py`
 
-Запуск Claude и Codex через subprocess, timeout, capture logs, redaction.
+Runs Claude and Codex through subprocess, timeout, log capture, and redaction.
 
 ### `/src/notifier.py`
 
-Отправка Telegram notifications и форматирование status messages.
+Sends Telegram notifications and formats status messages.
 
 ### `/src/logger.py`
 
-Structured events в `events.jsonl`, файловые логи, redaction helpers.
+Structured events in `events.jsonl`, file logs, redaction helpers.
 
-## Команды worker
+## Worker Commands
 
-Worker должен уметь выполнять:
+The worker must be able to run:
 
 - `git fetch`;
 - `git worktree add`;
-- запуск Claude;
-- запуск Codex;
-- запуск тестов;
+- Claude;
+- Codex;
+- tests;
 - `git status`;
 - `git diff`;
 - `git commit`;
@@ -89,9 +89,9 @@ Worker должен уметь выполнять:
 - `gh pr view`;
 - `gh pr checks`.
 
-## Конфигурация MVP
+## MVP Configuration
 
-Минимальные поля:
+Minimal fields:
 
 ```yaml
 telegram:
@@ -101,26 +101,45 @@ github:
   default_owner: danka19
 
 repositories:
-  greenflow:
-    url: git@github.com:owner/repo.git
+  codeassistant:
+    repo: danka19/CodeAssistant
     default_branch: main
+    purpose: orchestrator_self_development
+    local_path: /srv/ai-orchestrator/repos/codeassistant
+    worktree_root: /srv/ai-orchestrator/worktrees/codeassistant
     test_commands:
-      - pytest
+      - python -m compileall src tests
+      - python -m pytest -q
+      - python -m ruff check .
+      - python -m ruff format --check .
+
+  sandbox-py:
+    repo: danka19/ai-orchestrator-sandbox
+    default_branch: main
+    purpose: safe_end_to_end_test_repository
+    local_path: /srv/ai-orchestrator/repos/sandbox-py
+    worktree_root: /srv/ai-orchestrator/worktrees/sandbox-py
+    test_commands:
+      - python -m compileall src tests
+      - python -m pytest -q
+      - python -m ruff check .
+      - python -m ruff format --check .
 ```
 
-Секреты не должны храниться в `config.yaml`, если файл попадает в git. Для токенов использовать env.
+Secrets must not be stored in `config.yaml` if the file is committed. Use env for tokens.
 
-## Systemd вариант
+## Systemd Variant
 
-MVP может состоять из одного service:
+The MVP may consist of one service:
 
 ```text
 ai-orchestrator.service
 ```
 
-Service запускает Python process под пользователем `ai-orchestrator`, с ограниченным working directory и env file.
+The service runs the Python process under user `ai-orchestrator`, with a restricted working directory and env file.
 
-## Docker Compose вариант
+## Docker Compose
 
-Docker Compose допустим, если контейнер не получает `docker.sock`, root privileges и production secrets. Для MVP systemd проще и прозрачнее.
+Docker Compose is not part of the first MVP. For Phase 0-1, `systemd` is selected because it is simpler for the first VPS launch, interactive Claude/Codex CLI authorization, `git`, `gh`, SSH, worktrees, and file logs.
 
+Docker Compose can be reconsidered after Phase 7 if reproducible runtime or extra isolation becomes necessary. Do not expose `docker.sock` to agents in the MVP.

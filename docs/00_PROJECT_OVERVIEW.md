@@ -1,85 +1,86 @@
 # 00 Project Overview
 
-## Что строим
+## What We Are Building
 
-AI Dev Orchestrator - простую агентную систему разработки для Linux VPS. Система принимает задачи из Telegram, создает отдельную ветку и git worktree, запускает Claude для анализа и планирования, запускает Codex для реализации, выполняет проверки, создает Pull Request в GitHub и присылает отчет обратно в Telegram.
+AI Dev Orchestrator is a simple development agent system for a Linux VPS. The system accepts tasks from Telegram, creates a separate branch and git worktree, runs Claude for analysis and planning, runs Codex for implementation, executes checks, creates a GitHub Pull Request, and sends a report back to Telegram.
 
-Финальное слияние в `main` всегда остается ручным.
+Final merge into `main` is always manual.
 
-## Зачем строим
+## Why We Are Building It
 
-Цель - получить практичный workflow для разработки небольших и средних задач без ручного переключения между Telegram, GitHub, CLI-агентами, worktree, тестами и PR. Система должна экономить время на glue-work, но не заменять человеческое архитектурное решение и финальный merge.
+The goal is to get a practical workflow for small and medium development tasks without manually switching between Telegram, GitHub, CLI agents, worktrees, tests, and PRs. The system should save time on glue work, but it must not replace human architectural judgment or the final merge decision.
 
-## Какие проблемы решаем
+## Problems We Solve
 
-- Потеря контекста между постановкой задачи и реализацией.
-- Ручное создание веток, worktree, логов и PR.
-- Непрозрачность работы CLI-агентов.
-- Отсутствие единого состояния задачи.
-- Слабая воспроизводимость агентных запусков.
-- Риск случайных изменений в `main`.
-- Необходимость получать статус и ссылку на PR в удобном канале.
+- Context loss between task intake and implementation.
+- Manual branch, worktree, log, and PR setup.
+- Low visibility into CLI-agent work.
+- No single task state.
+- Weak reproducibility of agent runs.
+- Risk of accidental changes in `main`.
+- Need to receive status and PR links in a convenient channel.
 
-## Что входит в MVP
+## What Is In The MVP
 
-- Telegram intake для новых задач.
+- Telegram intake for new tasks.
 - SQLite task database.
-- Генерация `task_id`.
-- Создание branch и git worktree.
+- `task_id` generation.
+- Branch and git worktree creation.
 - Claude planning step.
-- Сохранение `plan.md`.
-- Optional approval для medium/high risk задач.
+- `plan.md` persistence.
+- Optional approval for medium/high-risk tasks.
 - Codex implementation step.
-- Сохранение логов.
-- Запуск build/test/lint, если команды настроены.
-- Создание PR через GitHub CLI или GitHub API.
-- Telegram-отчет со статусом и ссылкой на PR.
-- CI и review gates.
-- Ручной merge.
+- Log persistence.
+- Build/test/lint execution when commands are configured.
+- PR creation through GitHub CLI or GitHub API.
+- Telegram report with status and PR link.
+- CI and review gates.
+- Manual merge.
 
-## Что не входит в MVP
+## What Is Not In The MVP
 
-- Большой web UI.
-- Kubernetes, Temporal или сложный orchestrator.
-- Devin-like платформа.
+- Large web UI.
+- Kubernetes, Temporal, or a complex orchestrator.
+- Devin-like platform.
 - Multi-agent swarm.
 - Voice input.
 - Browser automation.
 - Auto-deploy.
 - Auto-merge.
 - Life assistant.
-- Платежи и покупки.
-- Сложная аналитика стоимости.
+- Payments and purchases.
+- Complex cost analytics.
 
-## Почему GitHub-first
+## Why GitHub-First
 
-GitHub уже является устойчивым source of truth для кода, веток, PR, CI, review и protected branch rules. MVP должен использовать эти готовые механизмы, а не дублировать их в собственной системе.
+GitHub is already a durable source of truth for code, branches, PRs, CI, review, and protected branch rules. The MVP should use those existing mechanisms instead of duplicating them in a custom system.
 
-GitHub-first подход дает:
+GitHub-first gives us:
 
-- понятную историю изменений;
-- стандартные PR и review;
-- CI как обязательный gate;
-- ручной контроль merge;
-- совместимость с CodeRabbit и другими PR-review инструментами;
-- возможность восстановить состояние даже при сбое VPS worker.
+- understandable change history;
+- standard PR and review flow;
+- CI as a required gate;
+- manual merge control;
+- compatibility with CodeRabbit and other PR-review tools;
+- ability to recover state even if the VPS worker fails.
 
-## Почему не начинаем с большого оркестратора
+## Why We Do Not Start With A Large Orchestrator
 
-Первый MVP должен доказать workflow, а не построить инфраструктурную платформу. Для одного владельца и нескольких репозиториев достаточно маленького Python worker, SQLite, git worktree, GitHub CLI и systemd или Docker Compose.
+The first MVP must prove the workflow, not build an infrastructure platform. For one owner and a few repositories, a small Python worker, SQLite, git worktrees, GitHub CLI, and systemd are enough.
 
-Большой orchestrator добавит сложность раньше, чем появятся реальные требования к масштабированию: очереди, retries, UI, распределенные воркеры, tenancy, quotas и сложная observability.
+Docker Compose is not part of the first MVP. It can be reconsidered after Phase 7 if reproducible runtime or extra isolation becomes necessary.
 
-## Почему dev-agent system и life-assistant лучше разделять
+A large orchestrator would add complexity before there are real scaling requirements: queues, retries, UI, distributed workers, tenancy, quotas, and complex observability.
 
-Dev-agent system работает с кодом, репозиториями, токенами GitHub, CI и локальными командами. Life-assistant может работать с календарем, покупками, личными данными, платежами и браузером. Это разные security domains.
+## Why Dev-Agent And Life-Assistant Systems Should Stay Separate
 
-В MVP их нужно разделять:
+The dev-agent system works with code, repositories, GitHub tokens, CI, and local commands. A life-assistant system may work with calendars, purchases, personal data, payments, and browsers. These are different security domains.
 
-- разные секреты;
-- разные permissions;
-- разные approval gates;
-- разные логи;
-- разные риски;
-- отсутствие доступа dev-agent к платежам, production secrets и личным интеграциям.
+In the MVP they must be separate:
 
+- separate secrets;
+- separate permissions;
+- separate approval gates;
+- separate logs;
+- separate risks;
+- no dev-agent access to payments, production secrets, or personal integrations.
