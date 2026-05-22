@@ -1,0 +1,79 @@
+# Current State
+
+Status: active
+Audience: humans and coding agents
+Owner: repository maintainers
+Last reviewed: 2026-05-23
+
+## Purpose
+
+This file is the canonical present-tense status document for the CodeAssistant repository.
+
+Use it to answer:
+
+- what is already true now;
+- which documentation architecture is active;
+- which roadmap phase is currently relevant;
+- which documentation gaps are still open.
+
+Do not use this file for speculative plans or append-only history.
+
+## Current Project Status
+
+- Product direction: AI Dev Orchestrator for a Linux VPS.
+- Active product documentation includes MVP scope, architecture, workflow, security, worker spec, roadmap, and MVP decisions.
+- Development-time repository policy has been split into `docs/development/`.
+- Future runtime agent policy has been split into `docs/runtime/`.
+- Governance and documentation rules have been split into `docs/governance/`.
+- Product-level knowledge-system policy is now defined in:
+  - `docs/19_AGENT_KNOWLEDGE_SYSTEM.md`
+  - `docs/20_DOCUMENTATION_OPERATIONS.md`
+- Product-level pilot rollout planning is defined in:
+  - `docs/21_PILOT_KNOWLEDGE_SYSTEM_PLAN.md`
+
+## Documentation Architecture Status
+
+Implemented:
+
+- top-level docs index: `docs/README.md`
+- development policy layer: `docs/development/*`
+- runtime policy layer: `docs/runtime/*`
+- governance layer: `docs/governance/*`
+- compatibility entrypoints for legacy mixed policy docs
+- product-level knowledge-system definition
+- current-state layer
+- task-log layer
+- decision index layer
+- plan index layer
+- architecture, development, and runtime maps
+
+Not yet implemented:
+
+- split of `docs/16_MVP_DECISIONS.md` into smaller decision records
+- metadata normalization across all older numbered docs
+- systematic cleanup of any remaining encoding issues in older docs
+- automated validation for documentation freshness
+
+## Canonical Ownership Snapshot
+
+- top-level docs map: `docs/README.md`
+- present-tense repo state: `docs/state/CURRENT_STATE.md`
+- task history: `docs/logs/TASK_LOG.md`
+- durable decision routing: `docs/decisions/DECISION_INDEX.md`
+- active plan routing: `docs/plans/PLAN_INDEX.md`
+- development-time contributor rules: `AGENTS.md` and `docs/development/*`
+- future runtime agent behavior: `docs/runtime/*`
+
+## Active Roadmap Context
+
+- The repository already has an MVP roadmap in `docs/12_IMPLEMENTATION_ROADMAP.md`.
+- Product implementation remains governed by Phases 0 through 7 for MVP behavior and worker capabilities.
+- Documentation-architecture rollout is governed by `Phase 8 - Knowledge System Rollout`.
+- For documentation work like this pilot, the active phase is `Phase 8`.
+- The current repository serves as the pilot proving ground for this model.
+
+## Open Documentation Gaps
+
+- verify whether mojibake seen in some shell output reflects actual file encoding issues or only terminal rendering;
+- decide when to split large decision and architecture omnibus files;
+- define the first stable rule for metadata normalization on older numbered docs.

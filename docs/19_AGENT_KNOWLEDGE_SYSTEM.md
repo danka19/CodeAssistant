@@ -1,7 +1,11 @@
 # 19 Agent Knowledge System
 
-Date: 2026-05-23.
 Status: active.
+Audience: humans and coding agents
+Owner: repository maintainers
+Update when: the product-level knowledge architecture, domain boundaries, or canonical storage model changes
+
+Date: 2026-05-23.
 
 ## Purpose
 

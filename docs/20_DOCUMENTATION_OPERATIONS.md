@@ -1,7 +1,11 @@
 # 20 Documentation Operations
 
-Date: 2026-05-23.
 Status: active.
+Audience: humans and coding agents
+Owner: repository maintainers
+Update when: documentation update workflow, logging expectations, or completion rules change
+
+Date: 2026-05-23.
 
 ## Purpose
 

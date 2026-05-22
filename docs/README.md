@@ -23,6 +23,11 @@ The documentation system is optimized for agent work:
 - `docs/governance/`: documentation standards, maintenance rules, and refactor plans.
 - `docs/development/`: development-time policy for contributors and Codex collaboration in this repository.
 - `docs/runtime/`: behavior and guardrails for the future orchestrated agents running on the VPS.
+- `docs/state/`: current factual status of the repository and documentation system.
+- `docs/logs/`: append-only task and documentation history.
+- `docs/decisions/`: routing and future storage for durable decisions.
+- `docs/plans/`: routing for active implementation and migration plans.
+- `docs/maps/`: domain entrypoints for architecture, development, and runtime navigation.
 - `docs/00_*.md` through `docs/16_*.md`: product, architecture, workflow, and MVP records that already define the system being built.
 
 ## Source Of Truth Map
@@ -50,6 +55,13 @@ The documentation system is optimized for agent work:
 - Codex local team model: `docs/development/CODEX_TEAM_MODEL.md`
 - Project-local skill policy: `docs/development/SKILL_SCOPE_POLICY.md`
 - Runtime policy entrypoint: `docs/runtime/RUNTIME_AGENT_POLICY.md`
+- Current repository state: `docs/state/CURRENT_STATE.md`
+- Task history: `docs/logs/TASK_LOG.md`
+- Decision routing: `docs/decisions/DECISION_INDEX.md`
+- Plan routing: `docs/plans/PLAN_INDEX.md`
+- Architecture map: `docs/maps/ARCHITECTURE_MAP.md`
+- Development map: `docs/maps/DEVELOPMENT_MAP.md`
+- Runtime map: `docs/maps/RUNTIME_MAP.md`
 
 ## Naming Rules
 

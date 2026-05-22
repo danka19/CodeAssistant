@@ -1,7 +1,11 @@
 # 21 Pilot Knowledge System Plan
 
-Date: 2026-05-23.
 Status: active.
+Audience: humans and coding agents
+Owner: repository maintainers
+Update when: the repository pilot rollout strategy or success criteria change
+
+Date: 2026-05-23.
 
 ## Purpose
 

@@ -47,7 +47,7 @@ Use this structure for all new documentation work:
   Instructions for humans and coding agents working on this repository.
 - `docs/runtime/`
   Rules for the future AI Dev Orchestrator runtime roles and artifacts.
-- `docs/adr/`
+- `docs/decisions/`
   Future home for split decision records when `docs/16_MVP_DECISIONS.md` is decomposed.
 - `docs/specs/`
   Future home for deep component specs when current numbered specs become too large.
