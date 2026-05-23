@@ -92,3 +92,19 @@ Examples:
 - high cost of error.
 
 GPT must not become a required gate for every MVP task. It should be enabled selectively for medium/high-risk tasks.
+
+## Agent Knowledge Responsibilities
+
+Every role that changes the system must preserve knowledge integrity.
+
+Minimum responsibilities:
+
+- planners point to canonical policy and architecture docs;
+- implementers update documentation when behavior or workflow changes;
+- reviewers check whether documentation drift was introduced;
+- human operators verify that durable decisions were not left only in task history.
+
+Knowledge-system rules are defined in:
+
+- `docs/19_AGENT_KNOWLEDGE_SYSTEM.md`
+- `docs/20_DOCUMENTATION_OPERATIONS.md`

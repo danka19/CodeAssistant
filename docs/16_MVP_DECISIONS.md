@@ -238,3 +238,26 @@ Minimal policy:
 - max planner pass: `1` for small/medium, separate approval for high risk.
 
 The goal of these limits is to avoid burning limits and creating conflicting parallel diffs.
+
+## 13. Knowledge System Decision
+
+The project adopts an Obsidian-style knowledge method without coupling the product to the Obsidian application itself.
+
+Decision:
+
+- knowledge is stored in normal repository Markdown files;
+- the method uses atomic notes, map documents, decision records, strong linking, and explicit status metadata;
+- current state, plans, decisions, logs, and policy must remain separate;
+- documentation maintenance is part of task completion, not optional cleanup.
+
+Why:
+
+- future agents need reliable retrieval of current truth;
+- future services must not inherit unsafe or irrelevant rules by accident;
+- the platform needs a scalable model for multi-agent and multi-service growth without a heavy documentation platform in MVP.
+
+Follow-up docs:
+
+- `docs/19_AGENT_KNOWLEDGE_SYSTEM.md`
+- `docs/20_DOCUMENTATION_OPERATIONS.md`
+- `docs/21_PILOT_KNOWLEDGE_SYSTEM_PLAN.md`

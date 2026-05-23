@@ -84,3 +84,23 @@ In the MVP they must be separate:
 - separate logs;
 - separate risks;
 - no dev-agent access to payments, production secrets, or personal integrations.
+
+## Knowledge System As Product Infrastructure
+
+CodeAssistant must also standardize how knowledge is stored and retrieved by agents.
+
+This is a product requirement, not only a repository documentation preference.
+
+The platform should evolve toward:
+
+- atomic, single-topic documents;
+- explicit source-of-truth files;
+- separate current state, plans, decisions, logs, and policy;
+- future service-specific knowledge boundaries;
+- reliable agent retrieval with low ambiguity.
+
+The active knowledge-system direction is defined in:
+
+- `docs/19_AGENT_KNOWLEDGE_SYSTEM.md`
+- `docs/20_DOCUMENTATION_OPERATIONS.md`
+- `docs/21_PILOT_KNOWLEDGE_SYSTEM_PLAN.md`

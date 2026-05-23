@@ -238,3 +238,34 @@ Do not do:
 - web dashboard;
 - life assistant;
 - production deploy automation.
+
+## Phase 8 - Knowledge System Rollout
+
+Goal: make documentation reliable enough for multi-agent reuse across repositories and future services.
+
+Implement:
+
+- canonical knowledge domains for state, plans, decisions, logs, and policy;
+- documentation update rules as part of task completion;
+- pilot rollout on the CodeAssistant repository;
+- review of ambiguity, duplication, and stale-doc risk;
+- migration path toward multi-service documentation boundaries.
+
+Done criteria:
+
+- the product has a documented knowledge-system model;
+- the current repository is used as a pilot proving ground;
+- current state, plan, decision, and log responsibilities are defined;
+- agents have explicit rules for documentation updates and evidence tracking.
+
+Risks:
+
+- over-engineering documentation before the workflow is proven;
+- duplicating existing docs instead of reorganizing them cleanly;
+- preserving too much history without clear active/deprecated markers.
+
+Do not do:
+
+- build a heavy documentation platform before the lightweight model is proven;
+- require complex automation for every doc update in MVP;
+- destroy or silently drop legacy information during reorganization.

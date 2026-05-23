@@ -120,3 +120,16 @@ Rules:
 - Project planning must explicitly separate accepted decisions from open questions.
 - Monitoring after MVP should be a separate scheduled mode, not mixed into the dev-agent loop.
 - Future life-assistant tasks must live in a separate security domain and must not receive access to dev secrets.
+
+## Documentation Update Step
+
+Any task that changes behavior, policy, architecture, workflow, state transitions, or operator process must include a documentation update step before final completion.
+
+Minimum expectation:
+
+- update the canonical source document for the changed topic;
+- record the task result in the task log layer;
+- update current-state material when factual project status changed;
+- create or update a decision record when a durable choice was made.
+
+The operational rules for this are defined in `docs/20_DOCUMENTATION_OPERATIONS.md`.
