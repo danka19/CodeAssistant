@@ -65,6 +65,12 @@ def test_parse_args_supports_prepare_workspace_command() -> None:
     assert args.repo_alias == "codeassistant"
 
 
+def test_parse_args_supports_check_github_auth_command() -> None:
+    args = parse_args(["check-github-auth"])
+
+    assert args.command == "check-github-auth"
+
+
 def test_main_routes_prepare_workspace_command(monkeypatch) -> None:
     captured: dict[str, object] = {}
 
@@ -98,6 +104,20 @@ def test_main_routes_run_bot_command(monkeypatch) -> None:
     monkeypatch.setattr("ai_orchestrator.app.run_telegram_polling", fake_run_telegram_polling)
 
     exit_code = main(["run-bot"])
+
+    assert exit_code == 0
+    assert "config_path" in captured
+
+
+def test_main_routes_check_github_auth_command(monkeypatch) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_check_github_auth(**kwargs) -> None:
+        captured.update(kwargs)
+
+    monkeypatch.setattr("ai_orchestrator.app.check_github_auth", fake_check_github_auth)
+
+    exit_code = main(["check-github-auth"])
 
     assert exit_code == 0
     assert "config_path" in captured

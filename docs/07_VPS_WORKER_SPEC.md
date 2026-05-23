@@ -59,7 +59,7 @@ Notification boundary. Phase 1 uses simple Telegram text formatting only.
 
 ### `/src/ai_orchestrator/integrations/github_client.py`
 
-Wrapper around `gh` or GitHub API: create PR, add labels, read checks, fetch PR URL.
+Wrapper around `gh` or GitHub API: current Phase 2 implementation validates auth through `gh auth status`; later phases add PR creation, labels, checks, and PR URL fetches.
 
 ### `/src/ai_orchestrator/integrations/claude_runner.py`
 
@@ -94,6 +94,7 @@ Current implementation note:
 
 - Phase 1 does not run worker commands.
 - The current Phase 2 slice can run repository preparation commands through the manual `prepare-workspace` CLI bridge only.
+- The current Phase 2 slice can also validate GitHub CLI auth through the manual `check-github-auth` CLI bridge.
 
 ## MVP Configuration
 
@@ -156,6 +157,12 @@ Current Phase 2 operator bridge:
 
 ```text
 ai-orchestrator prepare-workspace --config /srv/ai-orchestrator/config/config.yaml --database-path /srv/ai-orchestrator/data/tasks.sqlite3 --task-id task-123 --repo-alias codeassistant
+```
+
+Current Phase 2 GitHub auth check:
+
+```text
+ai-orchestrator check-github-auth --config /srv/ai-orchestrator/config/config.yaml --database-path /srv/ai-orchestrator/data/tasks.sqlite3
 ```
 
 ## Docker Compose

@@ -12,6 +12,7 @@ from ai_orchestrator.bot.handlers import BotCommandHandler
 from ai_orchestrator.bot.runtime import create_polling_application
 from ai_orchestrator.config.loader import AppConfig, load_app_config
 from ai_orchestrator.db.repository import TaskRepository
+from ai_orchestrator.integrations.github_client import GitHubClient
 from ai_orchestrator.services.intake_service import IntakeService
 from ai_orchestrator.services.workspace_preparation_service import WorkspacePreparationService
 from ai_orchestrator.worker.loop import WorkerLoop
@@ -29,6 +30,7 @@ class ApplicationContext:
     repository: TaskRepository
     intake_service: IntakeService
     bot_handler: BotCommandHandler
+    github_client: GitHubClient
     worker_loop: WorkerLoop
 
 
@@ -43,6 +45,7 @@ def build_application(config_path: Path, database_path: Path) -> ApplicationCont
         allowed_user_ids=config.telegram.allowed_user_ids,
     )
     bot_handler = BotCommandHandler(intake_service=intake_service)
+    github_client = GitHubClient(token_env=config.github.token_env)
     workspace_preparation_service = WorkspacePreparationService(
         repository=repository,
         config=config,
@@ -56,6 +59,7 @@ def build_application(config_path: Path, database_path: Path) -> ApplicationCont
         repository=repository,
         intake_service=intake_service,
         bot_handler=bot_handler,
+        github_client=github_client,
         worker_loop=worker_loop,
     )
 
@@ -127,6 +131,23 @@ def prepare_task_workspace(
     )
 
 
+def check_github_auth(*, config_path: Path, database_path: Path) -> None:
+    """Validate GitHub CLI auth using the configured token env."""
+
+    load_env_file(DEFAULT_ENV_PATH)
+    context = build_application(config_path=config_path, database_path=database_path)
+    status = context.github_client.check_auth()
+    print(
+        "\n".join(
+            [
+                f"Token env: {status.token_env}",
+                "GitHub auth: ok",
+                f"gh exit code: {status.exit_code}",
+            ]
+        )
+    )
+
+
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     """Parse CLI arguments for the current local runtime entrypoints."""
 
@@ -159,6 +180,12 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         help="Configured repository alias to use for the task.",
     )
 
+    check_github_auth_parser = subparsers.add_parser(
+        "check-github-auth",
+        help="Validate GitHub CLI auth using the configured token env.",
+    )
+    _add_common_path_arguments(check_github_auth_parser)
+
     return parser.parse_args(normalized_argv)
 
 
@@ -190,6 +217,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             database_path=args.database_path,
             task_id=args.task_id,
             repo_alias=args.repo_alias,
+        )
+        return 0
+    if args.command == "check-github-auth":
+        check_github_auth(
+            config_path=args.config,
+            database_path=args.database_path,
         )
         return 0
     raise RuntimeError(f"Unsupported command: {args.command}")

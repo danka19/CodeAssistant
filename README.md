@@ -18,6 +18,7 @@ What is already implemented:
 - SQLite-backed task/event persistence plus allowlist checks;
 - CLI entrypoint: `python -m ai_orchestrator.app` or `ai-orchestrator`;
 - manual Phase 2 worker bridge: `prepare-workspace --task-id <task-id> --repo-alias <alias>`;
+- manual Phase 2 GitHub auth check: `check-github-auth`;
 - unit and integration tests for the completed Phase 1 intake flow.
 
 Still out of scope at the current phase boundary:
@@ -106,6 +107,14 @@ This command:
 - creates branch `agent/task-...`;
 - creates a dedicated task worktree under the managed `worktrees/` root;
 - records git command events and updates the task status to `planning`.
+
+The current Phase 2 slice also adds a manual GitHub auth boundary:
+
+```bash
+python -m ai_orchestrator.app check-github-auth
+```
+
+This validates that the configured GitHub token env is present and that `gh auth status` succeeds without printing the token.
 
 ## Documentation Map
 

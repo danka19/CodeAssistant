@@ -30,6 +30,27 @@ Open follow-up:
 
 ## Entries
 
+## 2026-05-23 - phase-2 github auth boundary
+Status: done
+Actor: root assistant
+Summary: Replaced the GitHub integration stub with a Phase 2 auth boundary around `gh auth status`, added a manual `check-github-auth` CLI subcommand, and covered token/env plus CLI failure cases with unit tests.
+Docs updated:
+- `README.md`
+- `docs/07_VPS_WORKER_SPEC.md`
+- `docs/state/CURRENT_STATE.md`
+- `docs/logs/TASK_LOG.md`
+Checks:
+- `python -m compileall src tests`
+- `python -m pytest -q`
+- `python -m ruff check .`
+- `python -m ruff format --check .`
+Evidence:
+- `src/ai_orchestrator/integrations/github_client.py`
+- `tests/unit/test_github_client.py`
+- `src/ai_orchestrator/app.py`
+Open follow-up:
+- integrate authenticated GitHub operations into later push and PR phases without exposing token material
+
 ## 2026-05-23 - phase-2 manual worker bridge
 Status: done
 Actor: root assistant
