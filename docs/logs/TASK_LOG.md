@@ -30,6 +30,25 @@ Open follow-up:
 
 ## Entries
 
+## 2026-05-23 - phase-2 repository workspace foundation
+Status: done
+Actor: root assistant
+Summary: Added the first Phase 2 implementation slice for repository cache sync and per-task worktree preparation, including safe managed-path validation, branch slug generation, persisted workspace metadata on tasks, and git command event logging with exit codes.
+Docs updated:
+- `docs/state/CURRENT_STATE.md`
+- `docs/logs/TASK_LOG.md`
+Checks:
+- `python -m compileall src tests`
+- `python -m pytest -q`
+- `python -m ruff check .`
+- `python -m ruff format --check .`
+Evidence:
+- `src/ai_orchestrator/services/workspace_preparation_service.py`
+- `tests/unit/test_workspace_preparation_service.py`
+- `src/ai_orchestrator/db/schema.py`
+Open follow-up:
+- wire workspace preparation into the worker/runtime flow and add authenticated remote execution for real VPS runs
+
 ## 2026-05-23 - knowledge-system foundation
 Status: done
 Actor: root assistant
