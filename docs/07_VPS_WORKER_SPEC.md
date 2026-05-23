@@ -3,7 +3,7 @@
 ## MVP Stack
 
 - Python.
-- `python-telegram-bot` or `aiogram`.
+- `python-telegram-bot`.
 - SQLite.
 - `subprocess`.
 - GitHub CLI `gh`.
@@ -13,17 +13,18 @@
 ## Proposed Project Structure
 
 ```text
-/src/bot.py
-/src/worker.py
-/src/db.py
-/src/config.py
-/src/github_client.py
-/src/repo_manager.py
-/src/worktree_manager.py
-/src/agent_runner.py
-/src/notifier.py
-/src/logger.py
-/config/config.yaml
+/src/ai_orchestrator/app.py
+/src/ai_orchestrator/bot/
+/src/ai_orchestrator/worker/
+/src/ai_orchestrator/db/
+/src/ai_orchestrator/config/
+/src/ai_orchestrator/services/
+/src/ai_orchestrator/notifier/
+/src/ai_orchestrator/integrations/
+/src/ai_orchestrator/shared/
+/tests/unit/
+/tests/integration/
+/config/config.example.yaml
 /data/tasks.sqlite
 /runs/
 /repos/
@@ -32,49 +33,49 @@
 
 ## File Responsibilities
 
-### `/src/bot.py`
+### `/src/ai_orchestrator/bot/`
 
-Telegram command handlers. Accepts commands, validates user id, writes tasks and approvals to SQLite, sends short responses.
+Telegram command handlers and response formatting. Phase 1 currently implements `/task` and `/status`.
 
-### `/src/worker.py`
+### `/src/ai_orchestrator/worker/`
 
-Main state-machine loop. Takes queued tasks, calls managers/runners, changes statuses, handles errors and cancellation.
+Worker boundary. Phase 1 keeps this as a stub so the repository structure is ready before later workflow phases.
 
-### `/src/db.py`
+### `/src/ai_orchestrator/db/`
 
-SQLite schema, migrations, CRUD for tasks, events, approvals, runs, and check results.
+SQLite schema and repository code. Phase 1 currently stores tasks and events only.
 
-### `/src/config.py`
+### `/src/ai_orchestrator/config/`
 
-Loads configuration from env and `/config/config.yaml`. Does not log secrets.
+Loads typed configuration from `config/config.example.yaml` or a deployment config file. Does not log secrets.
 
-### `/src/github_client.py`
+### `/src/ai_orchestrator/services/`
+
+Application service layer. Phase 1 currently holds intake logic and authorization checks.
+
+### `/src/ai_orchestrator/notifier/`
+
+Notification boundary. Phase 1 uses simple Telegram text formatting only.
+
+### `/src/ai_orchestrator/integrations/github_client.py`
 
 Wrapper around `gh` or GitHub API: create PR, add labels, read checks, fetch PR URL.
 
-### `/src/repo_manager.py`
+### `/src/ai_orchestrator/integrations/claude_runner.py`
 
-Clone/fetch repository cache, validate remote, base branch, and clean state.
+Claude planning/review runner placeholder for later phases.
 
-### `/src/worktree_manager.py`
+### `/src/ai_orchestrator/integrations/codex_runner.py`
 
-Branch/worktree creation, path safety checks, cleanup on explicit request.
+Codex implementation runner placeholder for later phases.
 
-### `/src/agent_runner.py`
+### `/src/ai_orchestrator/shared/`
 
-Runs Claude and Codex through subprocess, timeout, log capture, and redaction.
-
-### `/src/notifier.py`
-
-Sends Telegram notifications and formats status messages.
-
-### `/src/logger.py`
-
-Structured events in `events.jsonl`, file logs, redaction helpers.
+Shared enums, id generation, clock helpers, and small shared types.
 
 ## Worker Commands
 
-The worker must be able to run:
+The full worker will eventually need to run:
 
 - `git fetch`;
 - `git worktree add`;
@@ -88,6 +89,8 @@ The worker must be able to run:
 - `gh pr create`;
 - `gh pr view`;
 - `gh pr checks`.
+
+Phase 1 does not run these commands yet.
 
 ## MVP Configuration
 
@@ -126,7 +129,9 @@ repositories:
       - python -m ruff format --check .
 ```
 
-Secrets must not be stored in `config.yaml` if the file is committed. Use env for tokens.
+Secrets must not be stored in tracked config templates. Use env for tokens.
+
+Tracked template path for the repository: `config/config.example.yaml`.
 
 ## Systemd Variant
 

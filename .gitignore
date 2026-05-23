@@ -2,6 +2,8 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.tmp/
+pytest-cache-files-*/
 .ruff_cache/
 .mypy_cache/
 .coverage
@@ -18,10 +20,14 @@ venv/
 .codex/session*
 
 # Runtime artifacts
-/data/
-/runs/
-/repos/
-/worktrees/
+/data/*
+!/data/.gitkeep
+/runs/*
+!/runs/.gitkeep
+/repos/*
+!/repos/.gitkeep
+/worktrees/*
+!/worktrees/.gitkeep
 *.sqlite
 *.sqlite3
 *.db

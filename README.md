@@ -6,23 +6,36 @@ The MVP accepts a task from Telegram, prepares a task brief, asks Claude to prod
 
 ## Current Phase
 
-The repository is in `Phase 0 - Project Bootstrap` from [docs/12_IMPLEMENTATION_ROADMAP.md](docs/12_IMPLEMENTATION_ROADMAP.md).
+The repository has closed `Phase 0 - Project Bootstrap` and now implements the first slice of `Phase 1 - Telegram Intake` from [docs/12_IMPLEMENTATION_ROADMAP.md](docs/12_IMPLEMENTATION_ROADMAP.md).
 
-Phase 0 scope:
+What is already implemented:
 
-- repository rules and agent instructions;
-- baseline MVP documentation;
-- Python stack selection;
-- example configuration;
-- README for human review.
+- folder-first repository layout with code, config, tests, docs, and runtime placeholders split by directory;
+- Python project bootstrap in `src/ai_orchestrator/`;
+- tracked config template in `config/config.example.yaml`;
+- minimal SQLite-backed intake flow for `/task` and `/status`;
+- unit and integration tests for the current intake slice.
 
-Out of Phase 0 scope:
+Still out of scope at the current phase boundary:
 
-- production worker code;
-- Telegram bot implementation;
+- task planning and approval workflow;
 - Claude/Codex subprocess runners;
-- PR creation automation;
+- GitHub branch, worktree, and PR automation;
+- full worker execution loop;
+- `/log`, `/approve`, `/reject`, and `/cancel`;
 - Docker Compose, Kubernetes, dashboards, or auto-deploy.
+
+## Repository Layout
+
+The repository keeps future development out of the root whenever possible.
+
+- `src/` contains Python application code.
+- `tests/` contains unit and integration tests.
+- `config/` contains tracked templates and configuration notes.
+- `docs/` contains policy, architecture, plans, state, logs, and workflow documentation.
+- `data/`, `runs/`, `repos/`, and `worktrees/` exist as runtime placeholders only; their contents are not tracked.
+
+The root is reserved for entrypoints and tooling such as `AGENTS.md`, `README.md`, `pyproject.toml`, and `.gitignore`.
 
 ## Fixed MVP Decisions
 
@@ -79,14 +92,7 @@ Generated runtime data, local SQLite databases, worktrees, cloned repositories, 
 
 ## Verification
 
-For docs-only Phase 0 changes, manual review plus basic repository checks are enough:
-
-```bash
-git status --short
-git diff --check
-```
-
-Once Python source and tests exist, use the configured project checks:
+Use the configured project checks:
 
 ```bash
 python -m compileall src tests
