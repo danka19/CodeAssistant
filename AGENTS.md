@@ -68,11 +68,14 @@ This section is a summary. Canonical detailed interpretation rules live in `docs
   - product implementation -> the active product phase in `docs/12_IMPLEMENTATION_ROADMAP.md`;
   - documentation/support work -> the active matching support-track plan.
 - Do not jump from a product phase to a documentation/support track unless the task is explicitly about documentation architecture, governance, or knowledge-system rollout.
+- Work on each roadmap phase in a corresponding branch for that phase, not on `main`.
 - If a request conflicts with `docs/16_MVP_DECISIONS.md`, stop and surface the conflict.
 - Do not collapse runtime roles into one vague implementation path.
 - Do not introduce auto-merge, auto-deploy, Kubernetes, broad platform scope, or unrelated refactors.
 - Never store or print secrets.
 - Work through branches and PRs, never direct merge logic into `main`.
+- After completing work for a phase slice, create a commit and push the branch.
+- If a full phase is complete, prepare a merge to `main` only after human согласование and with a clear description of what was done.
 - Update documentation when behavior, policy, workflow, or architecture changes.
 
 ## Default Checks

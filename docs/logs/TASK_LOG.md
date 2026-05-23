@@ -94,6 +94,47 @@ Evidence:
 Open follow-up:
 - complete independent review and resolve any findings
 
+## 2026-05-23 - phase-0 closure and phase-1 intake bootstrap
+Status: done
+Actor: root assistant
+Summary: Closed Phase 0 with a folder-first repository layout, added Python project bootstrap under `src/`, created runtime placeholder directories, and implemented the first Phase 1 intake slice with SQLite-backed `/task` and `/status` behavior plus tests.
+Docs updated:
+- `README.md`
+- `docs/06_TELEGRAM_BOT_SPEC.md`
+- `docs/07_VPS_WORKER_SPEC.md`
+- `docs/09_TASK_STATES.md`
+- `docs/12_IMPLEMENTATION_ROADMAP.md`
+- `docs/state/CURRENT_STATE.md`
+- `docs/logs/TASK_LOG.md`
+Checks:
+- `python -m compileall src tests`
+- `python -m pytest -q`
+- `python -m ruff check .`
+- `python -m ruff format --check .`
+Evidence:
+- `src/ai_orchestrator/`
+- `tests/unit/`
+- `tests/integration/`
+- `config/config.example.yaml`
+Open follow-up:
+- connect the current intake slice to a real Telegram runtime process and worker orchestration in later phases
+
+## 2026-05-23 - phase branch policy for agents
+Status: done
+Actor: root assistant
+Summary: Added explicit development-time rules that roadmap phase work must happen in corresponding branches, that completed phase slices must be committed and pushed, and that any merge of a completed phase into `main` requires human approval plus a clear implementation summary.
+Docs updated:
+- `AGENTS.md`
+- `docs/development/DEVELOPMENT_AGENT_POLICY.md`
+- `docs/logs/TASK_LOG.md`
+Checks:
+- not run, policy-only update
+Evidence:
+- `AGENTS.md`
+- `docs/development/DEVELOPMENT_AGENT_POLICY.md`
+Open follow-up:
+- none
+
 ## 2026-05-23 - roadmap interpretation rules
 Status: done
 Actor: root assistant

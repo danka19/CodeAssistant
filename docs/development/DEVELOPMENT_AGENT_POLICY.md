@@ -90,6 +90,10 @@ Represent these boundaries with separate modules, typed artifacts, and explicit 
 
 - Work through branches and PRs.
 - Use the project-local skill `implementation-protocol` when preparing scoped edits and close-out work.
+- Phase work must happen in a branch that clearly corresponds to the active roadmap phase or approved phase slice.
+- Do not perform phase work directly on `main`.
+- After completing an implementation slice for the active phase, create a commit and push the branch so the work is reviewable.
+- If a full roadmap phase is considered complete, merge to `main` happens only after human approval and with a clear summary of what was implemented, verified, and left open.
 - Do not rewrite unrelated files.
 - Do not do opportunistic refactoring.
 - Do not reformat the whole repository unless the task is specifically about formatting.

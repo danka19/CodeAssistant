@@ -1,5 +1,12 @@
 # 09 Task States
 
+This document records the full MVP target state machine.
+
+Current implementation status:
+
+- Phase 1 currently persists the intake subset only: `queued` and `failed`.
+- The rest of the workflow states remain planned for later phases.
+
 ## State Machine
 
 ```text
@@ -56,3 +63,12 @@ plan_rejected
 - Do not set `done` automatically after PR creation.
 - `done` does not mean auto-merge. In the MVP, it is a manual status after a human decision.
 - Fix loop must have an attempt limit.
+
+## Current Phase 1 Subset
+
+For the currently implemented intake slice:
+
+- `/task` stores a task in SQLite with status `queued`;
+- `/status` reads the current stored status;
+- unauthorized requests are rejected without creating a task;
+- worker-side transitions start only in later phases.
