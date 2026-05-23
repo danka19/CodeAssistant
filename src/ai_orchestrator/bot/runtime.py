@@ -1,4 +1,4 @@
-"""Runtime Telegram adapter for Phase 1 polling intake."""
+"""Runtime Telegram adapter for the current polling command set."""
 
 from __future__ import annotations
 
@@ -86,6 +86,26 @@ class TelegramPollingAdapter:
         )
         await self._call_with_retries(update.effective_message.reply_text, response)
 
+    async def on_approve(self, update: Any, context: Any) -> None:
+        if update.effective_user is None or update.effective_message is None:
+            return
+        command_text = update.effective_message.text or "/approve"
+        response = self._command_handler.handle_approve_command(
+            user_id=update.effective_user.id,
+            command_text=command_text,
+        )
+        await self._call_with_retries(update.effective_message.reply_text, response)
+
+    async def on_reject(self, update: Any, context: Any) -> None:
+        if update.effective_user is None or update.effective_message is None:
+            return
+        command_text = update.effective_message.text or "/reject"
+        response = self._command_handler.handle_reject_command(
+            user_id=update.effective_user.id,
+            command_text=command_text,
+        )
+        await self._call_with_retries(update.effective_message.reply_text, response)
+
     async def on_task_status_callback(self, update: Any, context: Any) -> None:
         if update.effective_user is None or update.callback_query is None:
             return
@@ -122,7 +142,7 @@ def create_polling_application(
     inline_keyboard_markup_factory: Callable[[list[list[Any]]], Any] | None = None,
     inline_keyboard_button_factory: Callable[[str, str], Any] | None = None,
 ) -> Any:
-    """Create a polling application and register Phase 1 command handlers."""
+    """Create a polling application and register the current command handlers."""
 
     if (
         application_builder_factory is None
@@ -159,6 +179,8 @@ def create_polling_application(
     application.add_handler(command_handler_factory("task", adapter.on_task))
     application.add_handler(command_handler_factory("tasks", adapter.on_tasks))
     application.add_handler(command_handler_factory("status", adapter.on_status))
+    application.add_handler(command_handler_factory("approve", adapter.on_approve))
+    application.add_handler(command_handler_factory("reject", adapter.on_reject))
     application.add_handler(command_handler_factory("help", adapter.on_help))
     application.add_handler(
         callback_query_handler_factory(

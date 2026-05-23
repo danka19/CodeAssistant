@@ -73,6 +73,14 @@ class _FakeBotCommandHandler:
         self.calls.append(("help", user_id, ""))
         return "help-response"
 
+    def handle_approve_command(self, user_id: int, command_text: str) -> str:
+        self.calls.append(("approve", user_id, command_text))
+        return "approve-response"
+
+    def handle_reject_command(self, user_id: int, command_text: str) -> str:
+        self.calls.append(("reject", user_id, command_text))
+        return "reject-response"
+
     def handle_tasks_command(self, user_id: int) -> tuple[str, list[object]]:
         self.calls.append(("tasks", user_id, ""))
 
@@ -122,6 +130,28 @@ def test_adapter_routes_help_command_and_replies() -> None:
 
     assert handler.calls == [("help", 1001, "")]
     assert update.effective_message.replies == ["help-response"]
+
+
+def test_adapter_routes_approve_command_and_replies() -> None:
+    handler = _FakeBotCommandHandler()
+    adapter = TelegramPollingAdapter(command_handler=handler)  # type: ignore[arg-type]
+    update = _FakeUpdate(1001, "/approve task-123")
+
+    asyncio.run(adapter.on_approve(update, None))  # type: ignore[arg-type]
+
+    assert handler.calls == [("approve", 1001, "/approve task-123")]
+    assert update.effective_message.replies == ["approve-response"]
+
+
+def test_adapter_routes_reject_command_and_replies() -> None:
+    handler = _FakeBotCommandHandler()
+    adapter = TelegramPollingAdapter(command_handler=handler)  # type: ignore[arg-type]
+    update = _FakeUpdate(1001, "/reject task-123 too broad")
+
+    asyncio.run(adapter.on_reject(update, None))  # type: ignore[arg-type]
+
+    assert handler.calls == [("reject", 1001, "/reject task-123 too broad")]
+    assert update.effective_message.replies == ["reject-response"]
 
 
 def test_adapter_routes_tasks_command_and_replies_with_menu() -> None:
@@ -239,10 +269,12 @@ def test_create_polling_application_registers_phase_1_commands() -> None:
         ["task"],
         ["tasks"],
         ["status"],
+        ["approve"],
+        ["reject"],
         ["help"],
     ]
-    assert len(captured_handlers) == 4
-    assert len(app.handlers) == 5
+    assert len(captured_handlers) == 6
+    assert len(app.handlers) == 7
     assert len(captured_callback_handlers) == 1
     assert captured_callback_handlers[0].pattern == "^task_status:"
 

@@ -13,8 +13,10 @@ from ai_orchestrator.bot.handlers import BotCommandHandler
 from ai_orchestrator.bot.runtime import create_polling_application
 from ai_orchestrator.config.loader import AppConfig, load_app_config
 from ai_orchestrator.db.repository import TaskRepository
+from ai_orchestrator.integrations.claude_runner import ClaudeRunner
 from ai_orchestrator.integrations.github_client import GitHubClient
 from ai_orchestrator.services.intake_service import IntakeService
+from ai_orchestrator.services.planning_service import PlanningService
 from ai_orchestrator.services.workspace_preparation_service import WorkspacePreparationService
 from ai_orchestrator.worker.loop import WorkerLoop
 
@@ -47,13 +49,23 @@ def build_application(config_path: Path, database_path: Path) -> ApplicationCont
     )
     bot_handler = BotCommandHandler(intake_service=intake_service)
     github_client = GitHubClient(token_env=config.github.token_env)
+    claude_runner = ClaudeRunner(
+        command=config.agents.claude_planner.command,
+        timeout_seconds=config.limits.command_timeout_seconds,
+    )
     workspace_preparation_service = WorkspacePreparationService(
         repository=repository,
         config=config,
     )
+    planning_service = PlanningService(
+        repository=repository,
+        claude_runner=claude_runner,
+        runs_dir=Path(config.runtime.runs_dir),
+    )
     worker_loop = WorkerLoop(
         repository=repository,
         workspace_preparation_service=workspace_preparation_service,
+        planning_service=planning_service,
     )
     return ApplicationContext(
         config=config,
@@ -149,6 +161,35 @@ def check_github_auth(*, config_path: Path, database_path: Path) -> None:
     )
 
 
+def plan_task(
+    *,
+    config_path: Path,
+    database_path: Path,
+    task_id: str,
+    risk_level: str,
+) -> None:
+    """Run the manual Phase 3 Claude planning bridge for one task."""
+
+    load_env_file(DEFAULT_ENV_PATH)
+    context = build_application(config_path=config_path, database_path=database_path)
+    result = context.worker_loop.plan_task(
+        task_id=task_id,
+        risk_level=risk_level,
+    )
+    print(
+        "\n".join(
+            [
+                f"Task: {result.task.task_id}",
+                f"Status: {result.task.status}",
+                f"Risk: {result.planning.risk_level}",
+                f"Approval required: {'yes' if result.planning.approval_required else 'no'}",
+                f"Plan artifact: {result.planning.artifact_path}",
+                f"Planning log: {result.planning.log_path}",
+            ]
+        )
+    )
+
+
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     """Parse CLI arguments for the current local runtime entrypoints."""
 
@@ -187,6 +228,23 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     )
     _add_common_path_arguments(check_github_auth_parser)
 
+    plan_task_parser = subparsers.add_parser(
+        "plan-task",
+        help="Run Claude planning for one task already in the planning state.",
+    )
+    _add_common_path_arguments(plan_task_parser)
+    plan_task_parser.add_argument(
+        "--task-id",
+        required=True,
+        help="Planning task id to run through Claude.",
+    )
+    plan_task_parser.add_argument(
+        "--risk",
+        required=True,
+        choices=("low", "medium", "high"),
+        help="Risk level used to choose approval behavior and artifact type.",
+    )
+
     return parser.parse_args(normalized_argv)
 
 
@@ -224,6 +282,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         check_github_auth(
             config_path=args.config,
             database_path=args.database_path,
+        )
+        return 0
+    if args.command == "plan-task":
+        plan_task(
+            config_path=args.config,
+            database_path=args.database_path,
+            task_id=args.task_id,
+            risk_level=args.risk,
         )
         return 0
     raise RuntimeError(f"Unsupported command: {args.command}")

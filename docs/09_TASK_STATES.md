@@ -6,6 +6,8 @@ Current implementation status:
 
 - Phase 1 persists the intake subset: `queued` and `failed`.
 - The current Phase 2 operator bridge can transition a queued task to `planning` after branch/worktree preparation is complete.
+- The current Phase 3 planner bridge can transition a planning task to `implementing` for low risk or `waiting_plan_approval` for medium/high risk while persisting planning artifacts under `runs/`.
+- Telegram `/approve` and `/reject` now operate on tasks in `waiting_plan_approval`.
 - The rest of the workflow states remain planned for later phases.
 
 ## State Machine
@@ -62,14 +64,17 @@ plan_rejected
 - `done` does not mean auto-merge. In the MVP, it is a manual status after a human decision.
 - Fix loop must have an attempt limit.
 
-## Current Phase 1 Subset
+## Current Implemented Subset
 
-For the currently implemented intake slice:
+For the currently implemented repository slice:
 
 - `/task` stores a task in SQLite with status `queued`;
 - `/tasks` lists recent tasks and opens per-task status through Telegram buttons;
 - `/status` reads the current stored status;
+- `/approve` moves `waiting_plan_approval` tasks to `implementing`;
+- `/reject` moves `waiting_plan_approval` tasks to `plan_rejected`;
 - `/help` returns the available intake commands;
 - unauthorized requests are rejected without creating a task;
 - the manual `prepare-workspace` CLI bridge can prepare repo/worktree and move a queued task to `planning`;
-- Claude planning, approval, implementation, PR, and review transitions still start in later phases.
+- the manual `plan-task` CLI bridge can run Claude planning, persist `input.md`, `plan.md` or `architecture_plan.md`, and move the task to the next approval boundary;
+- Codex implementation, PR, and review transitions still start in later phases.

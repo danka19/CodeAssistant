@@ -71,6 +71,22 @@ def test_parse_args_supports_check_github_auth_command() -> None:
     assert args.command == "check-github-auth"
 
 
+def test_parse_args_supports_plan_task_command() -> None:
+    args = parse_args(
+        [
+            "plan-task",
+            "--task-id",
+            "task-123",
+            "--risk",
+            "medium",
+        ]
+    )
+
+    assert args.command == "plan-task"
+    assert args.task_id == "task-123"
+    assert args.risk == "medium"
+
+
 def test_parse_args_uses_real_sys_argv_when_not_overridden(monkeypatch) -> None:
     monkeypatch.setattr(
         "sys.argv",
@@ -138,3 +154,26 @@ def test_main_routes_check_github_auth_command(monkeypatch) -> None:
 
     assert exit_code == 0
     assert "config_path" in captured
+
+
+def test_main_routes_plan_task_command(monkeypatch) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_plan_task(**kwargs) -> None:
+        captured.update(kwargs)
+
+    monkeypatch.setattr("ai_orchestrator.app.plan_task", fake_plan_task)
+
+    exit_code = main(
+        [
+            "plan-task",
+            "--task-id",
+            "task-123",
+            "--risk",
+            "high",
+        ]
+    )
+
+    assert exit_code == 0
+    assert captured["task_id"] == "task-123"
+    assert captured["risk_level"] == "high"

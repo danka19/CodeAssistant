@@ -35,11 +35,11 @@
 
 ### `/src/ai_orchestrator/bot/`
 
-Telegram command handlers, polling runtime adapter, and response formatting. Phase 1 implements `/task`, `/tasks`, `/status`, `/help`, and a polling startup path.
+Telegram command handlers, polling runtime adapter, and response formatting. The current implementation includes `/task`, `/tasks`, `/status`, `/approve`, `/reject`, `/help`, and a polling startup path.
 
 ### `/src/ai_orchestrator/worker/`
 
-Worker boundary. The current Phase 2 slice adds a manual operator bridge for repository/worktree preparation; planner, implementer, and review execution still remain for later phases.
+Worker boundary. The current implementation includes manual operator bridges for repository/worktree preparation and Claude planning; implementer and review execution still remain for later phases.
 
 ### `/src/ai_orchestrator/db/`
 
@@ -51,7 +51,7 @@ Loads typed configuration from `config/config.example.yaml` or a deployment conf
 
 ### `/src/ai_orchestrator/services/`
 
-Application service layer. Phase 1 currently holds intake logic and authorization checks.
+Application service layer. The current implementation holds intake logic, authorization checks, and the manual planning artifact workflow.
 
 ### `/src/ai_orchestrator/notifier/`
 
@@ -63,7 +63,7 @@ Wrapper around `gh` or GitHub API: current Phase 2 implementation validates auth
 
 ### `/src/ai_orchestrator/integrations/claude_runner.py`
 
-Claude planning/review runner placeholder for later phases.
+Claude planning/review runner boundary. The current Phase 3 slice runs the configured planner command in non-interactive print mode and captures stdout/stderr for persisted planning artifacts.
 
 ### `/src/ai_orchestrator/integrations/codex_runner.py`
 
@@ -95,6 +95,7 @@ Current implementation note:
 - Phase 1 does not run worker commands.
 - The current Phase 2 slice can run repository preparation commands through the manual `prepare-workspace` CLI bridge only.
 - The current Phase 2 slice can also validate GitHub CLI auth through the manual `check-github-auth` CLI bridge.
+- The current Phase 3 slice can run Claude planning through the manual `plan-task` CLI bridge.
 
 ## MVP Configuration
 
@@ -163,6 +164,12 @@ Current Phase 2 GitHub auth check:
 
 ```text
 ai-orchestrator check-github-auth --config /srv/ai-orchestrator/config/config.yaml --database-path /srv/ai-orchestrator/data/tasks.sqlite3
+```
+
+Current Phase 3 planner bridge:
+
+```text
+ai-orchestrator plan-task --config /srv/ai-orchestrator/config/config.yaml --database-path /srv/ai-orchestrator/data/tasks.sqlite3 --task-id task-123 --risk medium
 ```
 
 ## Docker Compose

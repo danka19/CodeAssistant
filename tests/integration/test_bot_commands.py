@@ -51,6 +51,8 @@ def test_help_command_returns_phase_1_command_summary() -> None:
     assert "/task <description>" in response
     assert "/tasks" in response
     assert "/status <task_id>" in response
+    assert "/approve <task_id>" in response
+    assert "/reject <task_id> [reason]" in response
     assert "/help" in response
 
 
@@ -87,3 +89,35 @@ def test_help_command_rejects_unauthorized_user() -> None:
         remove_runtime_test_dir(runtime_dir)
 
     assert response == "Unauthorized user."
+
+
+def test_approve_and_reject_commands_update_waiting_tasks() -> None:
+    runtime_dir = make_runtime_test_dir("bot-approval-commands")
+    try:
+        handler = build_handler(runtime_dir)
+        task_response = handler.handle_task_command(1001, "/task Review planner output")
+        task_id = task_response.split()[1]
+        repository = handler._intake_service.repository  # type: ignore[attr-defined]
+        repository.update_task_status(
+            task_id=task_id,
+            status="waiting_plan_approval",
+            updated_at="2026-05-23T00:00:00Z",
+        )
+
+        approve_response = handler.handle_approve_command(1001, f"/approve {task_id}")
+        repository.update_task_status(
+            task_id=task_id,
+            status="waiting_plan_approval",
+            updated_at="2026-05-23T00:00:01Z",
+        )
+        reject_response = handler.handle_reject_command(
+            1001,
+            f"/reject {task_id} scope too broad",
+        )
+    finally:
+        remove_runtime_test_dir(runtime_dir)
+
+    assert "approved" in approve_response
+    assert "implementing" in approve_response
+    assert "rejected" in reject_response
+    assert "plan_rejected" in reject_response
