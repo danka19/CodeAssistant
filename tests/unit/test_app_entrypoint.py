@@ -71,6 +71,23 @@ def test_parse_args_supports_check_github_auth_command() -> None:
     assert args.command == "check-github-auth"
 
 
+def test_parse_args_uses_real_sys_argv_when_not_overridden(monkeypatch) -> None:
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "python",
+            "check-github-auth",
+            "--config",
+            "config/custom.yaml",
+        ],
+    )
+
+    args = parse_args()
+
+    assert args.command == "check-github-auth"
+    assert str(args.config).endswith("config\\custom.yaml")
+
+
 def test_main_routes_prepare_workspace_command(monkeypatch) -> None:
     captured: dict[str, object] = {}
 

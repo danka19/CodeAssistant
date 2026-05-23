@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import asyncio
 from typing import Any, Callable
+from collections.abc import Awaitable
 
 from ai_orchestrator.bot.handlers import BotCommandHandler
+from telegram.error import TimedOut
 
 
 class TelegramPollingAdapter:
@@ -15,6 +18,9 @@ class TelegramPollingAdapter:
         command_handler: BotCommandHandler,
         inline_keyboard_markup_factory: Callable[[list[list[Any]]], Any] | None = None,
         inline_keyboard_button_factory: Callable[[str, str], Any] | None = None,
+        retry_attempts: int = 3,
+        retry_delay_seconds: float = 1.0,
+        sleep_func: Callable[[float], Awaitable[None]] | None = None,
     ) -> None:
         self._command_handler = command_handler
         self._inline_keyboard_markup_factory = (
@@ -27,6 +33,9 @@ class TelegramPollingAdapter:
             if inline_keyboard_button_factory is not None
             else (lambda text, callback_data: {"text": text, "callback_data": callback_data})
         )
+        self._retry_attempts = retry_attempts
+        self._retry_delay_seconds = retry_delay_seconds
+        self._sleep = sleep_func if sleep_func is not None else asyncio.sleep
 
     async def on_task(self, update: Any, context: Any) -> None:
         if update.effective_user is None or update.effective_message is None:
@@ -36,7 +45,7 @@ class TelegramPollingAdapter:
             user_id=update.effective_user.id,
             command_text=command_text,
         )
-        await update.effective_message.reply_text(response)
+        await self._call_with_retries(update.effective_message.reply_text, response)
 
     async def on_status(self, update: Any, context: Any) -> None:
         if update.effective_user is None or update.effective_message is None:
@@ -46,7 +55,7 @@ class TelegramPollingAdapter:
             user_id=update.effective_user.id,
             command_text=command_text,
         )
-        await update.effective_message.reply_text(response)
+        await self._call_with_retries(update.effective_message.reply_text, response)
 
     async def on_tasks(self, update: Any, context: Any) -> None:
         if update.effective_user is None or update.effective_message is None:
@@ -55,7 +64,7 @@ class TelegramPollingAdapter:
             user_id=update.effective_user.id,
         )
         if not menu_items:
-            await update.effective_message.reply_text(response)
+            await self._call_with_retries(update.effective_message.reply_text, response)
             return
 
         keyboard = [
@@ -63,7 +72,11 @@ class TelegramPollingAdapter:
             for item in menu_items
         ]
         reply_markup = self._inline_keyboard_markup_factory(keyboard)
-        await update.effective_message.reply_text(response, reply_markup=reply_markup)
+        await self._call_with_retries(
+            update.effective_message.reply_text,
+            response,
+            reply_markup=reply_markup,
+        )
 
     async def on_help(self, update: Any, context: Any) -> None:
         if update.effective_user is None or update.effective_message is None:
@@ -71,7 +84,7 @@ class TelegramPollingAdapter:
         response = self._command_handler.handle_help_command(
             user_id=update.effective_user.id,
         )
-        await update.effective_message.reply_text(response)
+        await self._call_with_retries(update.effective_message.reply_text, response)
 
     async def on_task_status_callback(self, update: Any, context: Any) -> None:
         if update.effective_user is None or update.callback_query is None:
@@ -81,8 +94,22 @@ class TelegramPollingAdapter:
             user_id=update.effective_user.id,
             callback_data=callback_data,
         )
-        await update.callback_query.answer()
-        await update.callback_query.message.reply_text(response)
+        await self._call_with_retries(update.callback_query.answer)
+        await self._call_with_retries(update.callback_query.message.reply_text, response)
+
+    async def _call_with_retries(
+        self, operation: Callable[..., Awaitable[Any]], *args: Any, **kwargs: Any
+    ) -> Any:
+        """Retry transient Telegram timeout failures a small number of times."""
+
+        for attempt in range(1, self._retry_attempts + 1):
+            try:
+                return await operation(*args, **kwargs)
+            except TimedOut:
+                if attempt >= self._retry_attempts:
+                    raise
+                await self._sleep(self._retry_delay_seconds)
+        return None
 
 
 def create_polling_application(

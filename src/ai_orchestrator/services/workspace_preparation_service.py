@@ -208,7 +208,7 @@ class WorkspacePreparationService:
             task_id=task_id,
             command=("git", "show-ref", "--verify", f"refs/heads/{branch_name}"),
             cwd=repo_path,
-            allow_exit_codes={0, 1},
+            allow_exit_codes={0, 1, 128},
         )
         if result.exit_code == 0:
             raise WorkspaceConflictError(f"Branch already exists: {branch_name}")

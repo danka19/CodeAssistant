@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Sequence
@@ -151,7 +152,7 @@ def check_github_auth(*, config_path: Path, database_path: Path) -> None:
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     """Parse CLI arguments for the current local runtime entrypoints."""
 
-    normalized_argv = list(argv) if argv is not None else []
+    normalized_argv = list(argv) if argv is not None else sys.argv[1:]
     if not normalized_argv or normalized_argv[0].startswith("-"):
         normalized_argv = ["run-bot", *normalized_argv]
 

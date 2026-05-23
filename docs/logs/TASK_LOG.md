@@ -30,6 +30,24 @@ Open follow-up:
 
 ## Entries
 
+## 2026-05-23 - telegram timeout retry hotfix
+Status: done
+Actor: root assistant
+Summary: Added a narrow out-of-phase Telegram polling hotfix that retries transient `TimedOut` reply failures before surfacing an error, based on live local verification against the real bot runtime.
+Docs updated:
+- `docs/06_TELEGRAM_BOT_SPEC.md`
+- `docs/state/CURRENT_STATE.md`
+- `docs/logs/TASK_LOG.md`
+Checks:
+- `python -m pytest -q tests/unit/test_bot_runtime.py`
+- `python -m ruff check src/ai_orchestrator/bot/runtime.py tests/unit/test_bot_runtime.py`
+- `python -m ruff format --check src/ai_orchestrator/bot/runtime.py tests/unit/test_bot_runtime.py`
+Evidence:
+- `src/ai_orchestrator/bot/runtime.py`
+- `tests/unit/test_bot_runtime.py`
+Open follow-up:
+- fold broader retry, timeout, and notification hardening into canonical Phase 7 instead of expanding this hotfix ad hoc
+
 ## 2026-05-23 - phase-2 github auth boundary
 Status: done
 Actor: root assistant

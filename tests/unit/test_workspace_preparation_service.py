@@ -108,6 +108,64 @@ def test_prepare_workspace_clones_fetches_and_assigns_worktree(monkeypatch) -> N
     assert events[-1].event_type == "workspace_prepared"
 
 
+def test_prepare_workspace_accepts_windows_show_ref_missing_branch_exit_code(monkeypatch) -> None:
+    runtime_dir = make_runtime_test_dir("workspace-prepare-win-show-ref")
+    try:
+        remote_path = runtime_dir / "remote-source"
+        remote_path.mkdir(parents=True, exist_ok=True)
+        app_config = _build_config(runtime_dir=runtime_dir, remote_path=remote_path)
+        repository = TaskRepository(runtime_dir / "tasks.sqlite3")
+        repository.initialize()
+        created_task = repository.create_task(
+            task_id="task-win128",
+            source_text="Windows show-ref exit code",
+            status="queued",
+            requested_by=1001,
+            created_at="2026-05-23T00:00:00Z",
+            updated_at="2026-05-23T00:00:00Z",
+        )
+        repo_cache = Path(app_config.repositories["sandbox"].local_path)
+        worktree_path = (
+            Path(app_config.repositories["sandbox"].worktree_root) / created_task.task_id
+        )
+
+        def fake_run(command, cwd=None, capture_output=True, text=True, check=False):
+            del cwd, capture_output, text, check
+            args = tuple(command)
+            if args[:2] == ("git", "clone"):
+                repo_cache.mkdir(parents=True, exist_ok=True)
+                (repo_cache / ".git").mkdir()
+                return CompletedProcess(command, 0, stdout="cloned\n", stderr="")
+            if args[:3] == ("git", "fetch", "origin"):
+                return CompletedProcess(command, 0, stdout="fetched\n", stderr="")
+            if args[:3] == ("git", "show-ref", "--verify"):
+                return CompletedProcess(
+                    command,
+                    128,
+                    stdout="",
+                    stderr="fatal: 'refs/heads/agent/task-win128-windows-show-ref-exit-code' - not a valid ref\n",
+                )
+            if args[:3] == ("git", "worktree", "add"):
+                worktree_path.mkdir(parents=True, exist_ok=True)
+                return CompletedProcess(command, 0, stdout="prepared\n", stderr="")
+            raise AssertionError(f"Unexpected command: {args}")
+
+        monkeypatch.setattr(
+            "ai_orchestrator.services.workspace_preparation_service.subprocess.run",
+            fake_run,
+        )
+
+        service = WorkspacePreparationService(repository=repository, config=app_config)
+        result = service.prepare_workspace(
+            task_id=created_task.task_id,
+            repo_alias="sandbox",
+        )
+    finally:
+        remove_runtime_test_dir(runtime_dir)
+
+    assert result.branch_name == "agent/task-win128-windows-show-ref-exit-code"
+
+
 def test_prepare_workspace_rejects_paths_outside_managed_roots() -> None:
     runtime_dir = make_runtime_test_dir("workspace-path-safety")
     try:

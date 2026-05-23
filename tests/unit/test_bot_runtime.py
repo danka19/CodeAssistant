@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
+from telegram.error import TimedOut
 
 from ai_orchestrator.app import run_telegram_polling
 from ai_orchestrator.bot.handlers import BotCommandHandler
@@ -15,8 +16,14 @@ class _FakeMessage:
         self.text = text
         self.replies: list[str] = []
         self.reply_markups: list[object | None] = []
+        self.failures_before_success = 0
+        self.call_count = 0
 
     async def reply_text(self, text: str, reply_markup: object | None = None) -> None:
+        self.call_count += 1
+        if self.failures_before_success > 0:
+            self.failures_before_success -= 1
+            raise TimedOut("timed out")
         self.replies.append(text)
         self.reply_markups.append(reply_markup)
 
@@ -139,6 +146,51 @@ def test_adapter_routes_task_status_callback_and_replies() -> None:
     assert handler.calls == [("task_status_callback", 1001, "task_status:task-1")]
     assert update.callback_query.answered is True
     assert update.callback_query.message.replies == ["task-status-callback-response"]
+
+
+def test_adapter_retries_transient_reply_timeout_and_succeeds() -> None:
+    handler = _FakeBotCommandHandler()
+    sleep_calls: list[float] = []
+
+    async def fake_sleep(delay: float) -> None:
+        sleep_calls.append(delay)
+
+    adapter = TelegramPollingAdapter(
+        command_handler=handler,  # type: ignore[arg-type]
+        retry_attempts=3,
+        retry_delay_seconds=0.25,
+        sleep_func=fake_sleep,
+    )
+    update = _FakeUpdate(1001, "/status task-123")
+    update.effective_message.failures_before_success = 1
+
+    asyncio.run(adapter.on_status(update, None))  # type: ignore[arg-type]
+
+    assert handler.calls == [("status", 1001, "/status task-123")]
+    assert update.effective_message.call_count == 2
+    assert update.effective_message.replies == ["status-response"]
+    assert sleep_calls == [0.25]
+
+
+def test_adapter_raises_after_exhausting_reply_retries() -> None:
+    handler = _FakeBotCommandHandler()
+
+    async def fake_sleep(delay: float) -> None:
+        return None
+
+    adapter = TelegramPollingAdapter(
+        command_handler=handler,  # type: ignore[arg-type]
+        retry_attempts=2,
+        retry_delay_seconds=0.1,
+        sleep_func=fake_sleep,
+    )
+    update = _FakeUpdate(1001, "/help")
+    update.effective_message.failures_before_success = 2
+
+    with pytest.raises(TimedOut):
+        asyncio.run(adapter.on_help(update, None))  # type: ignore[arg-type]
+
+    assert update.effective_message.call_count == 2
 
 
 def test_create_polling_application_registers_phase_1_commands() -> None:
