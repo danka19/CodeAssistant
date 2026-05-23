@@ -27,10 +27,27 @@ SCHEMA_STATEMENTS = (
     """,
 )
 
+TASK_COLUMN_MIGRATIONS = {
+    "repo_alias": "TEXT",
+    "branch_name": "TEXT",
+    "worktree_path": "TEXT",
+}
+
 
 def initialize_schema(connection: sqlite3.Connection) -> None:
-    """Create the minimum Phase 1 schema."""
+    """Create the current schema and backfill additive columns."""
 
     for statement in SCHEMA_STATEMENTS:
         connection.execute(statement)
+    _apply_task_column_migrations(connection)
     connection.commit()
+
+
+def _apply_task_column_migrations(connection: sqlite3.Connection) -> None:
+    existing_columns = {row[1] for row in connection.execute("PRAGMA table_info(tasks)").fetchall()}
+    for column_name, column_type in TASK_COLUMN_MIGRATIONS.items():
+        if column_name in existing_columns:
+            continue
+        connection.execute(
+            f"ALTER TABLE tasks ADD COLUMN {column_name} {column_type}",
+        )

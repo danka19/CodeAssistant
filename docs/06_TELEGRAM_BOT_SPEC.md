@@ -9,6 +9,7 @@ For the MVP, one allowed Telegram user id is sufficient.
 Current implementation status:
 
 - implemented in the initial minimal Phase 1 intake foundation: Telegram polling runtime, `/task`, `/tasks`, `/status`, `/help`, allowlist validation, SQLite persistence for tasks and events;
+- hotfix added after Phase 2 verification: limited retries for transient Telegram reply timeouts in the polling runtime;
 - planned for later phases: `/log`, `/approve`, `/reject`, `/cancel`, and richer notifications tied to planner/implementer/review stages.
 
 Planned near-term bot improvements:
@@ -108,6 +109,10 @@ Current phase note: not implemented in Phase 1.
 ## Notifications
 
 The initial minimal Phase 1 implementation now provides basic synchronous command responses over Telegram polling for accepted tasks and status lookups.
+
+Current hotfix note:
+
+- reply/send operations in the polling adapter now retry a small number of transient `TimedOut` failures before surfacing an error.
 
 Later phases will add notifications for:
 

@@ -6,8 +6,9 @@ from enum import Enum
 
 
 class TaskStatus(str, Enum):
-    """Currently implemented task states for Phase 1."""
+    """Task states currently recognized by the local implementation."""
 
     CREATED = "created"
     QUEUED = "queued"
+    PLANNING = "planning"
     FAILED = "failed"

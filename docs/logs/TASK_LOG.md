@@ -30,6 +30,86 @@ Open follow-up:
 
 ## Entries
 
+## 2026-05-23 - telegram timeout retry hotfix
+Status: done
+Actor: root assistant
+Summary: Added a narrow out-of-phase Telegram polling hotfix that retries transient `TimedOut` reply failures before surfacing an error, based on live local verification against the real bot runtime.
+Docs updated:
+- `docs/06_TELEGRAM_BOT_SPEC.md`
+- `docs/state/CURRENT_STATE.md`
+- `docs/logs/TASK_LOG.md`
+Checks:
+- `python -m pytest -q tests/unit/test_bot_runtime.py`
+- `python -m ruff check src/ai_orchestrator/bot/runtime.py tests/unit/test_bot_runtime.py`
+- `python -m ruff format --check src/ai_orchestrator/bot/runtime.py tests/unit/test_bot_runtime.py`
+Evidence:
+- `src/ai_orchestrator/bot/runtime.py`
+- `tests/unit/test_bot_runtime.py`
+Open follow-up:
+- fold broader retry, timeout, and notification hardening into canonical Phase 7 instead of expanding this hotfix ad hoc
+
+## 2026-05-23 - phase-2 github auth boundary
+Status: done
+Actor: root assistant
+Summary: Replaced the GitHub integration stub with a Phase 2 auth boundary around `gh auth status`, added a manual `check-github-auth` CLI subcommand, and covered token/env plus CLI failure cases with unit tests.
+Docs updated:
+- `README.md`
+- `docs/07_VPS_WORKER_SPEC.md`
+- `docs/state/CURRENT_STATE.md`
+- `docs/logs/TASK_LOG.md`
+Checks:
+- `python -m compileall src tests`
+- `python -m pytest -q`
+- `python -m ruff check .`
+- `python -m ruff format --check .`
+Evidence:
+- `src/ai_orchestrator/integrations/github_client.py`
+- `tests/unit/test_github_client.py`
+- `src/ai_orchestrator/app.py`
+Open follow-up:
+- integrate authenticated GitHub operations into later push and PR phases without exposing token material
+
+## 2026-05-23 - phase-2 manual worker bridge
+Status: done
+Actor: root assistant
+Summary: Added a Phase 2 manual worker bridge and CLI subcommand for explicit `task_id` plus `repo_alias` workspace preparation, including queued-task validation, transition to `planning`, and failure recording when workspace preparation fails.
+Docs updated:
+- `README.md`
+- `docs/07_VPS_WORKER_SPEC.md`
+- `docs/09_TASK_STATES.md`
+- `docs/state/CURRENT_STATE.md`
+- `docs/logs/TASK_LOG.md`
+Checks:
+- `python -m compileall src tests`
+- `python -m pytest -q`
+- `python -m ruff check .`
+- `python -m ruff format --check .`
+Evidence:
+- `src/ai_orchestrator/worker/loop.py`
+- `src/ai_orchestrator/app.py`
+- `tests/unit/test_worker_loop.py`
+Open follow-up:
+- replace the manual repo alias CLI bridge with typed intake/planner handoff once the runtime planning path exists
+
+## 2026-05-23 - phase-2 repository workspace foundation
+Status: done
+Actor: root assistant
+Summary: Added the first Phase 2 implementation slice for repository cache sync and per-task worktree preparation, including safe managed-path validation, branch slug generation, persisted workspace metadata on tasks, and git command event logging with exit codes.
+Docs updated:
+- `docs/state/CURRENT_STATE.md`
+- `docs/logs/TASK_LOG.md`
+Checks:
+- `python -m compileall src tests`
+- `python -m pytest -q`
+- `python -m ruff check .`
+- `python -m ruff format --check .`
+Evidence:
+- `src/ai_orchestrator/services/workspace_preparation_service.py`
+- `tests/unit/test_workspace_preparation_service.py`
+- `src/ai_orchestrator/db/schema.py`
+Open follow-up:
+- wire workspace preparation into the worker/runtime flow and add authenticated remote execution for real VPS runs
+
 ## 2026-05-23 - knowledge-system foundation
 Status: done
 Actor: root assistant

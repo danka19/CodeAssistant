@@ -4,7 +4,8 @@ This document records the full MVP target state machine.
 
 Current implementation status:
 
-- Phase 1 currently persists the intake subset only: `queued` and `failed`.
+- Phase 1 persists the intake subset: `queued` and `failed`.
+- The current Phase 2 operator bridge can transition a queued task to `planning` after branch/worktree preparation is complete.
 - The rest of the workflow states remain planned for later phases.
 
 ## State Machine
@@ -70,4 +71,5 @@ For the currently implemented intake slice:
 - `/status` reads the current stored status;
 - `/help` returns the available intake commands;
 - unauthorized requests are rejected without creating a task;
-- worker-side transitions start only in later phases.
+- the manual `prepare-workspace` CLI bridge can prepare repo/worktree and move a queued task to `planning`;
+- Claude planning, approval, implementation, PR, and review transitions still start in later phases.

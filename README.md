@@ -6,7 +6,7 @@ The MVP accepts a task from Telegram, prepares a task brief, asks Claude to prod
 
 ## Current Phase
 
-The repository has completed the initial minimal implementation for `Phase 1 - Telegram Intake` from [docs/12_IMPLEMENTATION_ROADMAP.md](docs/12_IMPLEMENTATION_ROADMAP.md). This branch closes that intake foundation and the next product implementation phase is `Phase 2 - GitHub/Repo Manager`.
+The repository has completed the initial minimal implementation for `Phase 1 - Telegram Intake` from [docs/12_IMPLEMENTATION_ROADMAP.md](docs/12_IMPLEMENTATION_ROADMAP.md). Work is now in `Phase 2 - GitHub/Repo Manager`, with repository/worktree preparation foundations and a manual worker bridge landed for operator-driven workspace setup.
 
 What is already implemented:
 
@@ -17,13 +17,15 @@ What is already implemented:
 - task browsing through `/tasks` with Telegram buttons that open per-task status;
 - SQLite-backed task/event persistence plus allowlist checks;
 - CLI entrypoint: `python -m ai_orchestrator.app` or `ai-orchestrator`;
+- manual Phase 2 worker bridge: `prepare-workspace --task-id <task-id> --repo-alias <alias>`;
+- manual Phase 2 GitHub auth check: `check-github-auth`;
 - unit and integration tests for the completed Phase 1 intake flow.
 
 Still out of scope at the current phase boundary:
 
 - task planning and approval workflow;
 - Claude/Codex subprocess runners;
-- GitHub branch, worktree, and PR automation;
+- full automatic GitHub branch/worktree/PR automation from intake through planner;
 - full worker execution loop;
 - `/log`, `/approve`, `/reject`, and `/cancel`;
 - Docker Compose, Kubernetes, dashboards, or auto-deploy.
@@ -89,6 +91,30 @@ Or run directly from the repository root without package installation:
 ```bash
 python run_bot.py --config config/config.example.yaml --database-path data/tasks.sqlite3
 ```
+
+## Phase 2 Operator Bridge
+
+The current Phase 2 slice adds a manual operator-facing bridge for repository preparation before the planner exists in runtime:
+
+```bash
+python -m ai_orchestrator.app prepare-workspace --task-id task-123 --repo-alias codeassistant
+```
+
+This command:
+
+- loads the configured repository alias;
+- clones or refreshes the cached repository under the managed `repos/` root;
+- creates branch `agent/task-...`;
+- creates a dedicated task worktree under the managed `worktrees/` root;
+- records git command events and updates the task status to `planning`.
+
+The current Phase 2 slice also adds a manual GitHub auth boundary:
+
+```bash
+python -m ai_orchestrator.app check-github-auth
+```
+
+This validates that the configured GitHub token env is present and that `gh auth status` succeeds without printing the token.
 
 ## Documentation Map
 

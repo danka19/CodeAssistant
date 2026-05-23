@@ -15,6 +15,9 @@ class TaskRecord:
     requested_by: int
     created_at: str
     updated_at: str
+    repo_alias: str | None = None
+    branch_name: str | None = None
+    worktree_path: str | None = None
 
 
 @dataclass(slots=True)
