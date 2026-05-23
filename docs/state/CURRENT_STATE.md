@@ -72,8 +72,12 @@ Not yet implemented:
 - The repository already has an MVP roadmap in `docs/12_IMPLEMENTATION_ROADMAP.md`.
 - The active product implementation phase is `Phase 1 - Telegram Intake`.
 - Product implementation remains governed by Phases 1 through 7 for MVP behavior and worker capabilities.
-- Documentation-architecture rollout is governed by `Phase 8 - Knowledge System Rollout`.
-- For documentation work like this pilot, the active phase is `Phase 8`.
+- The product roadmap contains `Phase 8 - Knowledge System Rollout` as the product-level documentation initiative.
+- The operational support-track plan for that initiative is `docs/21_PILOT_KNOWLEDGE_SYSTEM_PLAN.md`, routed via `docs/plans/PLAN_INDEX.md`.
+- These are different planning tracks:
+  - use the product roadmap for feature and workflow implementation;
+  - use the support-track plan routed by `docs/plans/PLAN_INDEX.md` for documentation architecture, governance, or knowledge-system work.
+- Do not interpret `Phase 8` as the next default product implementation step or as the operational router for support-track tasks.
 - The current repository serves as the pilot proving ground for this model.
 
 ## Open Documentation Gaps

@@ -17,6 +17,14 @@ During editing:
 - do not invent architecture or product decisions;
 - stop if required work crosses ownership boundaries.
 
+Use this skill as the procedural home for:
+
+- preparing a write set;
+- executing scoped edits;
+- task close-out mechanics after implementation.
+
+Do not duplicate repo-wide policy here. Canonical documentation-update responsibility remains in `docs/20_DOCUMENTATION_OPERATIONS.md`.
+
 ## Write-Set Rules
 
 Allowed write sets:
@@ -35,22 +43,20 @@ Never edit:
 1. Read the minimum local context needed.
 2. Apply the smallest patch.
 3. Run targeted formatting or checks only when relevant.
-4. Return `AgentResult`.
+4. Return the typed `AgentResult` shape defined in project-local skill `team-handoff`.
 
-## Required Result
+## Close-Out Checklist
 
-```text
-AgentResult
-status:
-summary:
-files_read:
-files_changed:
-checks_run:
-findings:
-risks:
-handoff_notes:
-needs_user_decision:
-```
+After implementation work:
+
+1. Check whether behavior, workflow, architecture, state, config, policy, or operator procedure changed.
+2. If yes, update the canonical doc for that topic in the same task.
+3. Add a task log entry in `docs/logs/TASK_LOG.md` for completed repository-level task work.
+4. If current factual repo status changed, update `docs/state/CURRENT_STATE.md`.
+5. If a durable decision was made, update the relevant decision document.
+6. Run the relevant checks or report honestly why they were not run.
+
+For the canonical documentation rules and evidence model, consult `docs/20_DOCUMENTATION_OPERATIONS.md` instead of restating it here.
 
 ## Block Instead Of Guessing
 

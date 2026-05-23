@@ -49,23 +49,9 @@ Delegate when:
 
 ## Work Order Contract
 
-Every delegated task should use this compact structure:
+Delegated tasks must use the typed `WorkOrder` contract defined in the project-local skill `team-handoff`.
 
-```text
-WorkOrder
-role:
-goal:
-scope:
-non_goals:
-read_paths:
-write_paths:
-allowed_tools:
-required_output:
-stop_conditions:
-token_budget:
-```
-
-Rules:
+Keep these invariants:
 
 - keep `read_paths` and `write_paths` narrow;
 - keep `write_paths` empty for read-only roles;
@@ -74,20 +60,7 @@ Rules:
 
 ## Result Contract
 
-Every child agent should return:
-
-```text
-AgentResult
-status: done | blocked | needs_fix | not_started
-summary:
-files_read:
-files_changed:
-checks_run:
-findings:
-risks:
-handoff_notes:
-needs_user_decision:
-```
+Every child agent should return the typed result shape defined in the project-local skill `team-handoff`.
 
 ## Model Policy
 

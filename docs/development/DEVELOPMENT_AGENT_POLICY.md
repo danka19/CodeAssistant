@@ -23,9 +23,32 @@ Before implementing changes, read the relevant system documents:
 - `docs/12_IMPLEMENTATION_ROADMAP.md`
 - `docs/16_MVP_DECISIONS.md`
 
-Always identify the current phase in `docs/12_IMPLEMENTATION_ROADMAP.md` and keep changes scoped to that phase.
+Always identify the active work track before implementing:
+
+- for product implementation, identify the current phase in `docs/12_IMPLEMENTATION_ROADMAP.md`;
+- for documentation/support work, identify the matching support-track plan routed by `docs/plans/PLAN_INDEX.md`.
 
 If a request conflicts with `docs/16_MVP_DECISIONS.md`, stop and surface the conflict.
+
+## Roadmap Interpretation Rules
+
+Use the documentation architecture deliberately:
+
+- `docs/12_IMPLEMENTATION_ROADMAP.md` is the canonical roadmap for product implementation.
+- `docs/plans/PLAN_INDEX.md` is a routing document that points to plan sources; it does not by itself choose the track you should work on.
+- `docs/state/CURRENT_STATE.md` is a factual status document; use it to understand what is currently true, but do not let it override the canonical product roadmap.
+- Numbered product phases in `docs/12_IMPLEMENTATION_ROADMAP.md` should be treated as product-delivery phases unless a phase explicitly states otherwise.
+- Documentation, governance, migration, and knowledge-system plans are support tracks. They become the active work track only when:
+  - the user explicitly asks for documentation/governance work; or
+  - the current implementation task is itself about documentation architecture or repository policy.
+- When both a product roadmap and a documentation/support plan are active, prefer the product roadmap for feature implementation and prefer the support plan for documentation-structure work.
+- Do not infer that the highest-numbered phase is the next product step. Match the phase to the work domain instead.
+- If a summary document, status note, or secondary plan appears to conflict with `docs/12_IMPLEMENTATION_ROADMAP.md`, treat `docs/12_IMPLEMENTATION_ROADMAP.md` as authoritative for product implementation and surface the discrepancy in your summary.
+- The detailed procedure for `continue by plan` lives in project-local skill `task-router`.
+- The detailed close-out procedure for implementation work lives in project-local skill `implementation-protocol`.
+- The detailed verification procedure lives in project-local skill `verification-gate`.
+- The detailed delegation contract and typed result procedure lives in project-local skill `team-handoff`.
+- The detailed findings-first review procedure lives in project-local skill `review-protocol`.
 
 ## Implementation Rules
 
@@ -66,6 +89,7 @@ Represent these boundaries with separate modules, typed artifacts, and explicit 
 ## Git And File Rules
 
 - Work through branches and PRs.
+- Use the project-local skill `implementation-protocol` when preparing scoped edits and close-out work.
 - Phase work must happen in a branch that clearly corresponds to the active roadmap phase or approved phase slice.
 - Do not perform phase work directly on `main`.
 - After completing an implementation slice for the active phase, create a commit and push the branch so the work is reviewable.
@@ -77,6 +101,8 @@ Represent these boundaries with separate modules, typed artifacts, and explicit 
 - Add `.gitignore` entries before creating local runtime artifacts.
 
 ## Testing Expectations
+
+Use project-local skill `verification-gate` for the operational procedure around choosing and reporting checks.
 
 Prefer test coverage around:
 
@@ -105,6 +131,11 @@ If checks cannot run because the project is not yet bootstrapped, state that exp
 - Update docs when behavior, architecture, security policy, state machine, CLI commands, config, or workflow changes.
 - Keep MVP and future expansion separate.
 - Put future-only ideas in `docs/15_FUTURE_EXPANSION.md`.
+- Use project-local skill `implementation-protocol` for the operational close-out checklist that applies these rules.
+- When documenting roadmap status, explicitly say whether you mean:
+  - active product phase; or
+  - active documentation/support track.
+- Avoid using the phrase `active phase` without the domain qualifier if more than one planning track exists.
 
 Canonical supporting documents:
 

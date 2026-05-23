@@ -9,21 +9,10 @@ Run only relevant checks.
 
 Until the project stack is fixed, discover commands in this order:
 1. package scripts or build files in the repo root;
-2. documented commands in project docs;
+2. canonical documented commands in `docs/development/DEVELOPMENT_AGENT_POLICY.md` and `AGENTS.md`;
 3. targeted commands requested by the parent agent.
 
-Report:
-
-```text
-VerificationResult
-commands_run:
-passed:
-failed:
-skipped:
-not_run:
-evidence_summary:
-likely_failure_area:
-```
+Report using the typed `VerificationResult` shape defined in project-local skill `team-handoff`.
 
 Rules:
 - Distinguish failed, skipped, and not run.
@@ -32,6 +21,8 @@ Rules:
 - Do not call partial verification complete.
 - If a command is unavailable, report that instead of inventing a substitute.
 - Prefer targeted checks over full-suite checks for small changes unless risk justifies more.
+
+If the repository already defines a canonical default check list, use that as the baseline expectation and then narrow only when the parent task scope justifies it.
 
 ## Common Discovery Commands
 
@@ -48,4 +39,3 @@ Return blocked when:
 - verification needs network;
 - command output implies implementation changes outside verification scope;
 - a command would be destructive or mutate unrelated state.
-
