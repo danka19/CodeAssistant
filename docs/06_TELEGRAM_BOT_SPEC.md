@@ -2,20 +2,25 @@
 
 ## Purpose
 
-The Telegram bot is the main user interface for the MVP. It accepts tasks, shows status, returns short logs, and accepts approvals.
+The Telegram bot is the main user interface for the MVP.
 
 For the MVP, one allowed Telegram user id is sufficient.
+
+Current implementation status:
+
+- implemented in Phase 1 now: `/task`, `/status`, allowlist validation, SQLite persistence for tasks and events;
+- planned for later phases: `/log`, `/approve`, `/reject`, `/cancel`, and richer notifications tied to planner/implementer/review stages.
 
 ## Commands
 
 ### `/task`
 
 - Purpose: create a new task.
-- Format: `/task <repo_alias> <task description>`.
-- Example: `/task codeassistant Fix crash when camera window closes`.
-- Behavior: creates `task_id`, stores input, sets status `created`.
-- Status: `created` -> `queued`.
-- Errors: unknown repo alias, empty description, unauthorized user, database unavailable.
+- Format: `/task <task description>`.
+- Example: `/task Fix crash when camera window closes`.
+- Behavior: creates `task_id`, stores input text, and sets status `queued`.
+- Status: current implementation returns `queued`.
+- Errors: empty description, unauthorized user, database unavailable.
 - Response: `Task task-123 accepted. Status: queued.`
 
 ### `/status`
@@ -23,10 +28,10 @@ For the MVP, one allowed Telegram user id is sufficient.
 - Purpose: show task state.
 - Format: `/status <task_id>`.
 - Example: `/status task-123`.
-- Behavior: reads SQLite and returns status, branch, PR URL, latest event.
+- Behavior: reads SQLite and returns the current stored task status.
 - Status: unchanged.
 - Errors: task not found, user not allowed.
-- Response: `task-123: implementing. Branch: agent/task-123-fix-camera-close.`
+- Response: `task-123: queued.`
 
 ### `/log`
 
@@ -38,6 +43,8 @@ For the MVP, one allowed Telegram user id is sufficient.
 - Errors: task not found, logs unavailable, log too large.
 - Response: short secret-free fragment.
 
+Current phase note: not implemented in Phase 1.
+
 ### `/approve`
 
 - Purpose: approve a plan or gated action.
@@ -47,6 +54,8 @@ For the MVP, one allowed Telegram user id is sufficient.
 - Status: `waiting_plan_approval` -> `implementing` or `queued`.
 - Errors: task not found, task not waiting for approval, user not allowed.
 - Response: `task-123 approved. Implementation will start.`
+
+Current phase note: not implemented in Phase 1.
 
 ### `/reject`
 
@@ -58,6 +67,8 @@ For the MVP, one allowed Telegram user id is sufficient.
 - Errors: task not found, task not waiting for approval.
 - Response: `task-123 rejected. Reason saved.`
 
+Current phase note: not implemented in Phase 1.
+
 ### `/cancel`
 
 - Purpose: cancel a task.
@@ -67,6 +78,8 @@ For the MVP, one allowed Telegram user id is sufficient.
 - Status: current status -> `cancelled` if stopping is possible.
 - Errors: task not found, already finished, cancellation unsafe at current step.
 - Response: `task-123 cancellation requested.`
+
+Current phase note: not implemented in Phase 1.
 
 ### `/help`
 
@@ -79,7 +92,9 @@ For the MVP, one allowed Telegram user id is sufficient.
 
 ## Notifications
 
-The MVP must send notifications for:
+Phase 1 only requires basic command responses for accepted tasks and status lookups.
+
+Later phases will add notifications for:
 
 - `task accepted`: task created.
 - `planning started`: Claude planning started.

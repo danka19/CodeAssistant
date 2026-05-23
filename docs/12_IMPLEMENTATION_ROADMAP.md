@@ -10,7 +10,7 @@ Implement:
 - add `AGENTS.md`;
 - add baseline documentation;
 - choose Python stack;
-- configure `config.example.yaml`;
+- configure `config/config.example.yaml`;
 - prepare `README.md`.
 
 Readiness criteria:
@@ -18,6 +18,7 @@ Readiness criteria:
 - docs describe the MVP path;
 - agent rules exist;
 - project structure is agreed;
+- folder-first repository layout is in place;
 - first PR can be reviewed manually.
 
 Risks:
@@ -49,6 +50,7 @@ Readiness criteria:
 - `/task` creates a task in SQLite;
 - `/status task-123` returns state;
 - unauthorized user is blocked.
+- branch/worktree/planner/implementer steps are still out of scope.
 
 Risks:
 

@@ -22,6 +22,9 @@ Do not use this file for speculative plans or append-only history.
 
 - Product direction: AI Dev Orchestrator for a Linux VPS.
 - Active product documentation includes MVP scope, architecture, workflow, security, worker spec, roadmap, and MVP decisions.
+- Phase 0 repository bootstrap is complete.
+- The repository now follows a folder-first layout with code in `src/`, tests in `tests/`, tracked templates in `config/`, and durable instructions in `docs/`.
+- A minimal Phase 1 intake slice exists: `/task` and `/status` logic, SQLite storage for tasks/events, and test coverage for the current intake flow.
 - Development-time repository policy has been split into `docs/development/`.
 - Future runtime agent policy has been split into `docs/runtime/`.
 - Governance and documentation rules have been split into `docs/governance/`.
@@ -67,7 +70,8 @@ Not yet implemented:
 ## Active Roadmap Context
 
 - The repository already has an MVP roadmap in `docs/12_IMPLEMENTATION_ROADMAP.md`.
-- Product implementation remains governed by Phases 0 through 7 for MVP behavior and worker capabilities.
+- The active product implementation phase is `Phase 1 - Telegram Intake`.
+- Product implementation remains governed by Phases 1 through 7 for MVP behavior and worker capabilities.
 - Documentation-architecture rollout is governed by `Phase 8 - Knowledge System Rollout`.
 - For documentation work like this pilot, the active phase is `Phase 8`.
 - The current repository serves as the pilot proving ground for this model.
@@ -77,3 +81,4 @@ Not yet implemented:
 - verify whether mojibake seen in some shell output reflects actual file encoding issues or only terminal rendering;
 - decide when to split large decision and architecture omnibus files;
 - define the first stable rule for metadata normalization on older numbered docs.
+- decide when to promote the current intake-only bot commands into the fuller Telegram command set described for later phases.

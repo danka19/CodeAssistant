@@ -46,11 +46,14 @@ Before implementing, use these source documents:
 ## Non-Negotiable Rules
 
 - Keep changes inside the active roadmap phase.
+- Work on each roadmap phase in a corresponding branch for that phase, not on `main`.
 - If a request conflicts with `docs/16_MVP_DECISIONS.md`, stop and surface the conflict.
 - Do not collapse runtime roles into one vague implementation path.
 - Do not introduce auto-merge, auto-deploy, Kubernetes, broad platform scope, or unrelated refactors.
 - Never store or print secrets.
 - Work through branches and PRs, never direct merge logic into `main`.
+- After completing work for a phase slice, create a commit and push the branch.
+- If a full phase is complete, prepare a merge to `main` only after human согласование and with a clear description of what was done.
 - Update documentation when behavior, policy, workflow, or architecture changes.
 
 ## Default Checks
