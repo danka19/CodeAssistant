@@ -39,7 +39,7 @@ Telegram command handlers, polling runtime adapter, and response formatting. Pha
 
 ### `/src/ai_orchestrator/worker/`
 
-Worker boundary. Phase 1 keeps this as a stub so the repository structure is ready before later workflow phases.
+Worker boundary. The current Phase 2 slice adds a manual operator bridge for repository/worktree preparation; planner, implementer, and review execution still remain for later phases.
 
 ### `/src/ai_orchestrator/db/`
 
@@ -90,7 +90,10 @@ The full worker will eventually need to run:
 - `gh pr view`;
 - `gh pr checks`.
 
-Phase 1 does not run these commands yet.
+Current implementation note:
+
+- Phase 1 does not run worker commands.
+- The current Phase 2 slice can run repository preparation commands through the manual `prepare-workspace` CLI bridge only.
 
 ## MVP Configuration
 
@@ -147,6 +150,12 @@ Phase 1 startup command can be:
 
 ```text
 ai-orchestrator --config /srv/ai-orchestrator/config/config.yaml --database-path /srv/ai-orchestrator/data/tasks.sqlite3
+```
+
+Current Phase 2 operator bridge:
+
+```text
+ai-orchestrator prepare-workspace --config /srv/ai-orchestrator/config/config.yaml --database-path /srv/ai-orchestrator/data/tasks.sqlite3 --task-id task-123 --repo-alias codeassistant
 ```
 
 ## Docker Compose

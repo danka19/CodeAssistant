@@ -30,6 +30,28 @@ Open follow-up:
 
 ## Entries
 
+## 2026-05-23 - phase-2 manual worker bridge
+Status: done
+Actor: root assistant
+Summary: Added a Phase 2 manual worker bridge and CLI subcommand for explicit `task_id` plus `repo_alias` workspace preparation, including queued-task validation, transition to `planning`, and failure recording when workspace preparation fails.
+Docs updated:
+- `README.md`
+- `docs/07_VPS_WORKER_SPEC.md`
+- `docs/09_TASK_STATES.md`
+- `docs/state/CURRENT_STATE.md`
+- `docs/logs/TASK_LOG.md`
+Checks:
+- `python -m compileall src tests`
+- `python -m pytest -q`
+- `python -m ruff check .`
+- `python -m ruff format --check .`
+Evidence:
+- `src/ai_orchestrator/worker/loop.py`
+- `src/ai_orchestrator/app.py`
+- `tests/unit/test_worker_loop.py`
+Open follow-up:
+- replace the manual repo alias CLI bridge with typed intake/planner handoff once the runtime planning path exists
+
 ## 2026-05-23 - phase-2 repository workspace foundation
 Status: done
 Actor: root assistant

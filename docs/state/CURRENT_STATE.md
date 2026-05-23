@@ -26,6 +26,7 @@ Do not use this file for speculative plans or append-only history.
 - The repository now follows a folder-first layout with code in `src/`, tests in `tests/`, tracked templates in `config/`, and durable instructions in `docs/`.
 - The initial minimal implementation for Phase 1 is complete with a runnable Telegram polling intake bot for `/task`, `/tasks`, `/status`, and `/help`, SQLite storage for tasks/events, allowlist checks, and test coverage.
 - An initial Phase 2 foundation now exists for repository cache preparation and per-task worktree creation, including branch slug generation, managed-path safety checks, persisted task workspace metadata, and git command event logging.
+- The current Phase 2 slice also adds a manual worker/CLI bridge that prepares one queued task by explicit `task_id` and `repo_alias`, then moves that task to `planning`.
 - Development-time repository policy has been split into `docs/development/`.
 - Future runtime agent policy has been split into `docs/runtime/`.
 - Governance and documentation rules have been split into `docs/governance/`.

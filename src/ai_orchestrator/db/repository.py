@@ -89,6 +89,30 @@ class TaskRepository:
             raise LookupError(f"Unknown task id: {task_id}")
         return task
 
+    def update_task_status(
+        self,
+        *,
+        task_id: str,
+        status: str,
+        updated_at: str,
+    ) -> TaskRecord:
+        """Persist a task status transition."""
+
+        with self._connect() as connection:
+            connection.execute(
+                """
+                UPDATE tasks
+                SET status = ?, updated_at = ?
+                WHERE task_id = ?
+                """,
+                (status, updated_at, task_id),
+            )
+            connection.commit()
+        task = self.get_task(task_id)
+        if task is None:
+            raise LookupError(f"Unknown task id: {task_id}")
+        return task
+
     def add_event(
         self,
         *,
