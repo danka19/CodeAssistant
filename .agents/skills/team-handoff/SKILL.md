@@ -7,6 +7,23 @@ description: "Create compact typed handoffs for project subagent work. Use whene
 
 Use typed, compact handoffs.
 
+This skill is the procedural home for typed delegation contracts in this repository.
+
+Use it whenever:
+
+- the root assistant prepares a delegated task;
+- a subagent result is being summarized or consumed;
+- review or verification output needs to be normalized.
+
+Repo policy may name these artifacts, but the templates and usage details should live here rather than being duplicated across multiple docs.
+
+This skill is the canonical home for the shapes of:
+
+- `WorkOrder`
+- `AgentResult`
+- `ReviewReport`
+- `VerificationResult`
+
 ## Principles
 
 - Pass only task-local context.

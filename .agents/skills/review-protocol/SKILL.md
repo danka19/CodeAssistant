@@ -18,17 +18,7 @@ Require or reconstruct:
 
 If inputs are missing, state that in `residual_risks` or return `blocked` if review would be misleading.
 
-Use:
-
-```text
-ReviewReport
-verdict: accept | accept_with_followups | needs_fix | blocked
-findings:
-residual_risks:
-checks_reviewed:
-missing_checks:
-scope_notes:
-```
+Use the typed `ReviewReport` shape defined in project-local skill `team-handoff`.
 
 Rules:
 - Findings first, ordered by severity.

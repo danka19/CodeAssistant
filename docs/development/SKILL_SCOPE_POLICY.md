@@ -28,10 +28,15 @@ Do not place repository-specific workflow, roadmap, handoff, or validation skill
 Use only these project-local skills:
 
 - `task-router`
+  Route ambiguous work, `continue by plan`, roadmap-track choice, risk, and delegation.
 - `team-handoff`
+  Define typed delegation contracts and normalized subagent outputs.
 - `implementation-protocol`
+  Govern scoped edits and implementation close-out procedure.
 - `review-protocol`
+  Govern read-only findings-first review procedure.
 - `verification-gate`
+  Govern deterministic check selection, execution, and reporting.
 
 Do not import Stamp Room-specific skills into this repository.
 
