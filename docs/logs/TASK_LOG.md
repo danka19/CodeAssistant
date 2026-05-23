@@ -212,3 +212,187 @@ Evidence:
 - `.agents/skills/`
 Open follow-up:
 - run final consistency review on routing and typed-contract ownership
+
+## 2026-05-23 - phase-1 branch sync rule and help command
+Status: done
+Actor: root assistant
+Summary: Explicitly required fetch-then-update-main before phase branching in development policy docs, then extended the current Phase 1 intake slice with a basic `/help` command and tests.
+Docs updated:
+- `AGENTS.md`
+- `docs/development/DEVELOPMENT_AGENT_POLICY.md`
+- `docs/08_GITHUB_FLOW.md`
+- `docs/06_TELEGRAM_BOT_SPEC.md`
+- `README.md`
+- `docs/state/CURRENT_STATE.md`
+- `docs/logs/TASK_LOG.md`
+Checks:
+- `python -m compileall src tests`
+- `python -m pytest -q`
+- `python -m ruff check .`
+- `python -m ruff format --check .`
+Evidence:
+- `src/ai_orchestrator/bot/handlers.py`
+- `src/ai_orchestrator/bot/presenter.py`
+- `src/ai_orchestrator/services/intake_service.py`
+- `tests/integration/test_bot_commands.py`
+Open follow-up:
+- decide whether the remaining Phase 1 slice should add runtime Telegram adapter behavior or stop at the current command-level interface
+
+## 2026-05-23 - roadmap phase completion rule
+Status: done
+Actor: root assistant
+Summary: Clarified that a minimal slice is not enough to call a roadmap phase complete; phase completion now requires satisfying the phase scope and readiness criteria from the canonical roadmap.
+Docs updated:
+- `AGENTS.md`
+- `docs/development/DEVELOPMENT_AGENT_POLICY.md`
+- `docs/logs/TASK_LOG.md`
+Checks:
+- not run, policy-only update
+Evidence:
+- `AGENTS.md`
+- `docs/development/DEVELOPMENT_AGENT_POLICY.md`
+Open follow-up:
+- none
+
+## 2026-05-23 - live smoke verification policy
+Status: done
+Actor: root assistant
+Summary: Strengthened repository acceptance policy so agents must run the closest realistic local/live smoke path before claiming runtime-facing work is ready, instead of relying only on unit, integration, or static checks when a direct runnable path exists.
+Docs updated:
+- `AGENTS.md`
+- `docs/development/DEVELOPMENT_AGENT_POLICY.md`
+- `docs/runtime/RUNTIME_LIMITS_AND_DONE_CRITERIA.md`
+- `docs/logs/TASK_LOG.md`
+Checks:
+- not run, policy-only update
+Evidence:
+- `AGENTS.md`
+- `docs/development/DEVELOPMENT_AGENT_POLICY.md`
+- `docs/runtime/RUNTIME_LIMITS_AND_DONE_CRITERIA.md`
+Open follow-up:
+- apply this acceptance rule consistently to future implementation close-out
+
+## 2026-05-23 - environment-limit escalation policy
+Status: done
+Actor: root assistant
+Summary: Added a repository rule that when environment limits block meaningful implementation or verification, the agent must identify the specific boundary, stop, and agree with the user on the required environment setup instead of silently accepting the limitation.
+Docs updated:
+- `AGENTS.md`
+- `docs/development/DEVELOPMENT_AGENT_POLICY.md`
+- `docs/logs/TASK_LOG.md`
+Checks:
+- not run, policy-only update
+Evidence:
+- `AGENTS.md`
+- `docs/development/DEVELOPMENT_AGENT_POLICY.md`
+Open follow-up:
+- apply this rule to future live-verification blockers before close-out
+
+## 2026-05-23 - multi-agent priority rule
+Status: done
+Actor: root assistant
+Summary: Added a default policy to prefer multi-agent execution for quality, with a narrow exception for tiny low-risk changes that do not justify delegation.
+Docs updated:
+- `AGENTS.md`
+- `docs/development/DEVELOPMENT_AGENT_POLICY.md`
+- `docs/logs/TASK_LOG.md`
+Checks:
+- not run, policy-only update
+Evidence:
+- `AGENTS.md`
+- `docs/development/DEVELOPMENT_AGENT_POLICY.md`
+Open follow-up:
+- none
+
+## 2026-05-23 - phase-1 runtime completion
+Status: done
+Actor: root assistant with analyst_architect and programmer subagents
+Summary: Completed Phase 1 by adding a runnable Telegram polling adapter, startup path with token env loading, command-level runtime tests, and documentation for local/VPS smoke-testing.
+Docs updated:
+- `README.md`
+- `config/README.md`
+- `docs/03_WORKFLOW.md`
+- `docs/06_TELEGRAM_BOT_SPEC.md`
+- `docs/07_VPS_WORKER_SPEC.md`
+- `docs/09_TASK_STATES.md`
+- `docs/state/CURRENT_STATE.md`
+- `docs/logs/TASK_LOG.md`
+Checks:
+- `python -m compileall src tests`
+- `python -m pytest -q`
+- `python -m ruff check .`
+- `python -m ruff format --check .`
+Evidence:
+- `src/ai_orchestrator/app.py`
+- `src/ai_orchestrator/bot/runtime.py`
+- `tests/unit/test_bot_runtime.py`
+Open follow-up:
+- begin `Phase 2 - GitHub/Repo Manager`
+
+## 2026-05-23 - telegram bot follow-up planning
+Status: done
+Actor: root assistant
+Summary: Recorded planned Telegram bot follow-up work: keep access allowlist configuration close to bot secret configuration, and add a `/tasks` button menu that opens per-task status views by task id.
+Docs updated:
+- `docs/06_TELEGRAM_BOT_SPEC.md`
+- `docs/state/CURRENT_STATE.md`
+- `docs/logs/TASK_LOG.md`
+Checks:
+- not run, docs-only planning update
+Evidence:
+- `docs/06_TELEGRAM_BOT_SPEC.md`
+- `docs/state/CURRENT_STATE.md`
+Open follow-up:
+- implement the Telegram configuration consolidation and `/tasks` menu in a later product phase
+
+## 2026-05-23 - telegram tasks menu and allowlist env override
+Status: done
+Actor: root assistant with analyst_architect and programmer subagents
+Summary: Added `/tasks` with Telegram button navigation to task status, plus an optional environment override for Telegram allowed user ids so token and allowlist can live together in `.env.local` or a deployment env file.
+Docs updated:
+- `README.md`
+- `config/README.md`
+- `docs/06_TELEGRAM_BOT_SPEC.md`
+- `docs/state/CURRENT_STATE.md`
+- `docs/logs/TASK_LOG.md`
+Checks:
+- `python -m compileall src tests`
+- `python -m pytest -q`
+- `python -m ruff check .`
+- `python -m ruff format --check .`
+Evidence:
+- `src/ai_orchestrator/config/loader.py`
+- `src/ai_orchestrator/bot/handlers.py`
+- `src/ai_orchestrator/bot/runtime.py`
+- `tests/unit/test_config_loader.py`
+- `tests/unit/test_bot_runtime.py`
+- `tests/integration/test_bot_commands.py`
+Open follow-up:
+- decide whether `/tasks` should stay capped to recent tasks or gain pagination
+
+## 2026-05-23 - phase-1 intake closure and pr prep
+Status: done
+Actor: root assistant
+Summary: Closed the initial minimal Telegram intake implementation as the accepted Phase 1 repository baseline, synchronized status-facing documentation, and prepared the branch for PR handoff.
+Docs updated:
+- `README.md`
+- `docs/06_TELEGRAM_BOT_SPEC.md`
+- `docs/07_VPS_WORKER_SPEC.md`
+- `docs/09_TASK_STATES.md`
+- `docs/state/CURRENT_STATE.md`
+- `docs/logs/TASK_LOG.md`
+Checks:
+- `python run_bot.py --help`
+- `python run_bot.py --config config/config.example.yaml --database-path data/tasks.sqlite3` with test env values, reaching Telegram startup and failing only on outbound network access
+- `python -m compileall src tests`
+- `python -m pytest -q`
+- `python -m ruff check .`
+- `python -m ruff format --check .`
+Evidence:
+- `run_bot.py`
+- `src/ai_orchestrator/app.py`
+- `src/ai_orchestrator/bot/runtime.py`
+- `README.md`
+- `docs/state/CURRENT_STATE.md`
+Open follow-up:
+- begin `Phase 2 - GitHub/Repo Manager`

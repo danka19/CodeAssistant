@@ -37,7 +37,7 @@ class IntakeService:
     def create_task(self, *, user_id: int, source_text: str) -> TaskRecord:
         """Create a queued task and record an intake event."""
 
-        self._ensure_authorized(user_id)
+        self.ensure_authorized(user_id=user_id)
         cleaned_text = source_text.strip()
         if not cleaned_text:
             raise ValidationError("`/task` requires a task description.")
@@ -66,7 +66,7 @@ class IntakeService:
     def get_task_status(self, *, user_id: int, task_id: str) -> TaskRecord:
         """Return the current task state for an allowed user."""
 
-        self._ensure_authorized(user_id)
+        self.ensure_authorized(user_id=user_id)
         normalized_task_id = task_id.strip()
         if not normalized_task_id:
             raise ValidationError("`/status` requires a task id.")
@@ -76,6 +76,14 @@ class IntakeService:
             raise TaskNotFoundError(normalized_task_id)
         return task
 
-    def _ensure_authorized(self, user_id: int) -> None:
+    def list_tasks(self, *, user_id: int, limit: int = 10) -> list[TaskRecord]:
+        """Return recent tasks for an allowed user."""
+
+        self.ensure_authorized(user_id=user_id)
+        return self.repository.list_tasks(limit=limit)
+
+    def ensure_authorized(self, *, user_id: int) -> None:
+        """Validate that the Telegram user is allowed to use the intake bot."""
+
         if user_id not in self.allowed_user_ids:
             raise UnauthorizedUserError(user_id)

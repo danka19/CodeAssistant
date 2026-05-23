@@ -3,8 +3,8 @@
 ## General Task Workflow
 
 1. The user sends a task in Telegram.
-2. The bot creates `task_id`, stores input, and sets status `created`.
-3. The worker moves the task to `queued`, then `planning`.
+2. The bot creates `task_id`, stores input, and sets status `queued`.
+3. The worker moves the task to `planning`.
 4. The repository manager updates the base repository.
 5. The worktree manager creates the branch and worktree.
 6. The Claude runner creates the plan.
@@ -35,7 +35,7 @@ Flow:
 
 ```text
 /task
--> created
+-> queued
 -> planning
 -> short plan.md
 -> implementing
@@ -62,6 +62,7 @@ Flow:
 
 ```text
 /task
+-> queued
 -> planning
 -> waiting_plan_approval
 -> approved

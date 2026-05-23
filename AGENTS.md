@@ -56,6 +56,8 @@ This section is a summary. Canonical detailed interpretation rules live in `docs
   - documentation, governance, or knowledge-system plans govern repository-structure work only when the task is explicitly about those topics.
 - If multiple plan documents are active at the same time, choose the one that matches the user's requested work instead of following the most recently updated plan document.
 - If `CURRENT_STATE.md`, `PLAN_INDEX.md`, or another summary document appears to conflict with `docs/12_IMPLEMENTATION_ROADMAP.md`, treat `docs/12_IMPLEMENTATION_ROADMAP.md` as authoritative for product implementation and report the conflict.
+- Prefer multi-agent execution for implementation and review work when it can improve quality through separation of analysis, coding, verification, or review responsibilities.
+- If the assistant judges that a change is very small, has no important architectural decisions, and carries little realistic chance of coding error, it may complete the work locally without delegation.
 - For the procedural algorithm behind `continue by plan`, use project-local skill `task-router`.
 - Before file edits, use project-local skill `implementation-protocol`.
 - For delegated work contracts and typed subagent outputs, use project-local skill `team-handoff`.
@@ -68,14 +70,19 @@ This section is a summary. Canonical detailed interpretation rules live in `docs
   - product implementation -> the active product phase in `docs/12_IMPLEMENTATION_ROADMAP.md`;
   - documentation/support work -> the active matching support-track plan.
 - Do not jump from a product phase to a documentation/support track unless the task is explicitly about documentation architecture, governance, or knowledge-system rollout.
+- Before starting implementation work, fetch the repository and update local `main` from `origin/main`.
+- Only after local `main` is current, create a new branch from `main` that clearly matches the active phase or approved phase slice.
 - Work on each roadmap phase in a corresponding branch for that phase, not on `main`.
+- Do not treat a minimal slice as phase completion when the roadmap still lists unfinished implementation items or unmet readiness criteria for that phase.
 - If a request conflicts with `docs/16_MVP_DECISIONS.md`, stop and surface the conflict.
 - Do not collapse runtime roles into one vague implementation path.
 - Do not introduce auto-merge, auto-deploy, Kubernetes, broad platform scope, or unrelated refactors.
 - Never store or print secrets.
 - Work through branches and PRs, never direct merge logic into `main`.
 - After completing work for a phase slice, create a commit and push the branch.
-- If a full phase is complete, prepare a merge to `main` only after human согласование and with a clear description of what was done.
+- If local `main` cannot be safely updated first, stop and get agreement before branching or editing phase work.
+- If environment limits block meaningful implementation, verification, or live smoke testing, investigate the exact limit, stop, and agree with the user on the environment change before claiming readiness or silently working around the gap.
+- If a full phase is complete, prepare a merge to `main` only after human approval and with a clear description of what was done.
 - Update documentation when behavior, policy, workflow, or architecture changes.
 
 ## Default Checks
@@ -83,6 +90,8 @@ This section is a summary. Canonical detailed interpretation rules live in `docs
 The canonical default checks for code changes are defined in `docs/development/DEVELOPMENT_AGENT_POLICY.md`.
 
 When running or narrowing verification, use project-local skill `verification-gate`.
+
+For user-visible or runtime-facing changes, do not claim the work is ready based only on dry, unit, integration, or static checks if a direct smoke path exists in the current environment. Run the closest realistic live smoke test you can and report exactly what was exercised.
 
 Default commands:
 
@@ -100,7 +109,9 @@ If checks cannot run, say so explicitly and provide manual verification steps.
 The task is done only when:
 
 - the change matches the active work track for the task domain;
+- roadmap items and readiness criteria for the claimed completed phase are actually satisfied, or the phase is explicitly reported as still in progress;
 - changed files are scoped and explainable;
 - checks ran, or the gap is documented honestly;
+- when a realistic local/live smoke path exists for the changed behavior, that path was exercised before declaring the work ready, or the blocker was documented honestly;
 - docs were updated if behavior or policy changed;
 - the final summary states what changed, how it was verified, and what remains open.

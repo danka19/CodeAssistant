@@ -14,6 +14,8 @@ runtime:
 telegram:
   # The real bot token must come from the environment, not this file.
   bot_token_env: TELEGRAM_BOT_TOKEN
+  # Optional override for allowlist in deployment env files (comma-separated ids).
+  allowed_user_ids_env: TELEGRAM_ALLOWED_USER_IDS
   allowed_user_ids: []
 
 github:

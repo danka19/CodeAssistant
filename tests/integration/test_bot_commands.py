@@ -37,3 +37,53 @@ def test_status_command_returns_not_found_for_unknown_task() -> None:
         remove_runtime_test_dir(runtime_dir)
 
     assert response == "Task task-missing not found."
+
+
+def test_help_command_returns_phase_1_command_summary() -> None:
+    runtime_dir = make_runtime_test_dir("bot-help")
+    try:
+        handler = build_handler(runtime_dir)
+
+        response = handler.handle_help_command(1001)
+    finally:
+        remove_runtime_test_dir(runtime_dir)
+
+    assert "/task <description>" in response
+    assert "/tasks" in response
+    assert "/status <task_id>" in response
+    assert "/help" in response
+
+
+def test_tasks_command_returns_menu_and_callback_opens_status() -> None:
+    runtime_dir = make_runtime_test_dir("bot-tasks-menu")
+    try:
+        handler = build_handler(runtime_dir)
+        first_response = handler.handle_task_command(1001, "/task First task title")
+        second_response = handler.handle_task_command(1001, "/task Second task title")
+
+        menu_text, menu_items = handler.handle_tasks_command(1001)
+        callback_response = handler.handle_task_status_callback(
+            1001,
+            menu_items[0].callback_data,
+        )
+    finally:
+        remove_runtime_test_dir(runtime_dir)
+
+    assert "accepted" in first_response
+    assert "accepted" in second_response
+    assert menu_text == "Select a task to open status:"
+    assert len(menu_items) == 2
+    assert menu_items[0].callback_data.startswith("task_status:")
+    assert ": queued." in callback_response
+
+
+def test_help_command_rejects_unauthorized_user() -> None:
+    runtime_dir = make_runtime_test_dir("bot-help-unauthorized")
+    try:
+        handler = build_handler(runtime_dir)
+
+        response = handler.handle_help_command(2002)
+    finally:
+        remove_runtime_test_dir(runtime_dir)
+
+    assert response == "Unauthorized user."

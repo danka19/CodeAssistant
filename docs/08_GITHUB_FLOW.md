@@ -4,6 +4,8 @@
 
 - `main` is protected.
 - Direct push to `main` is forbidden.
+- Before starting phase work, fetch the repository and update local `main` from `origin/main`.
+- Create the working branch only after local `main` is current.
 - All changes go through feature branches.
 - Branch pattern: `agent/task-123-short-slug`.
 - Every result is represented as a Pull Request.
