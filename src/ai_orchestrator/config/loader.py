@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import os
 from pathlib import Path
 
@@ -35,6 +35,23 @@ class GitHubConfig:
 
 
 @dataclass(slots=True)
+class ClaudePlannerConfig:
+    command: str
+
+
+@dataclass(slots=True)
+class AgentsConfig:
+    claude_planner: ClaudePlannerConfig = field(
+        default_factory=lambda: ClaudePlannerConfig(command="claude")
+    )
+
+
+@dataclass(slots=True)
+class LimitsConfig:
+    command_timeout_seconds: int = 1800
+
+
+@dataclass(slots=True)
 class RepositoryConfig:
     repo: str
     default_branch: str
@@ -50,6 +67,8 @@ class AppConfig:
     telegram: TelegramConfig
     github: GitHubConfig
     repositories: dict[str, RepositoryConfig]
+    agents: AgentsConfig = field(default_factory=AgentsConfig)
+    limits: LimitsConfig = field(default_factory=LimitsConfig)
 
 
 def load_app_config(path: Path) -> AppConfig:
@@ -65,10 +84,20 @@ def load_app_config(path: Path) -> AppConfig:
         alias: RepositoryConfig(**repo_data)
         for alias, repo_data in raw.get("repositories", {}).items()
     }
+    agents_raw = raw.get("agents", {})
+    limits_raw = raw.get("limits", {})
     return AppConfig(
         runtime=RuntimeConfig(**raw["runtime"]),
         telegram=telegram_config,
         github=GitHubConfig(**raw["github"]),
+        agents=AgentsConfig(
+            claude_planner=ClaudePlannerConfig(
+                command=agents_raw.get("claude_planner", {}).get("command", "claude"),
+            )
+        ),
+        limits=LimitsConfig(
+            command_timeout_seconds=int(limits_raw.get("command_timeout_seconds", 1800)),
+        ),
         repositories=repositories,
     )
 

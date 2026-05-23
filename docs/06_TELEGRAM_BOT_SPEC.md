@@ -10,7 +10,8 @@ Current implementation status:
 
 - implemented in the initial minimal Phase 1 intake foundation: Telegram polling runtime, `/task`, `/tasks`, `/status`, `/help`, allowlist validation, SQLite persistence for tasks and events;
 - hotfix added after Phase 2 verification: limited retries for transient Telegram reply timeouts in the polling runtime;
-- planned for later phases: `/log`, `/approve`, `/reject`, `/cancel`, and richer notifications tied to planner/implementer/review stages.
+- Phase 3 now adds `/approve` and `/reject` for tasks waiting on manual plan approval;
+- planned for later phases: `/log`, `/cancel`, and richer notifications tied to planner/implementer/review stages.
 
 Planned near-term bot improvements:
 
@@ -67,11 +68,11 @@ Current phase note: not implemented in Phase 1.
 - Format: `/approve <task_id>`.
 - Example: `/approve task-123`.
 - Behavior: records an approval event.
-- Status: `waiting_plan_approval` -> `implementing` or `queued`.
+- Status: `waiting_plan_approval` -> `implementing`.
 - Errors: task not found, task not waiting for approval, user not allowed.
-- Response: `task-123 approved. Implementation will start.`
+- Response: `task-123 approved. Status: implementing.`
 
-Current phase note: not implemented in Phase 1.
+Current phase note: implemented as a Telegram command/state transition in Phase 3; actual Codex execution still starts in Phase 4.
 
 ### `/reject`
 
@@ -81,9 +82,9 @@ Current phase note: not implemented in Phase 1.
 - Behavior: records rejection.
 - Status: `waiting_plan_approval` -> `plan_rejected`.
 - Errors: task not found, task not waiting for approval.
-- Response: `task-123 rejected. Reason saved.`
+- Response: `task-123 rejected. Status: plan_rejected.`
 
-Current phase note: not implemented in Phase 1.
+Current phase note: implemented as a Telegram command/state transition in Phase 3.
 
 ### `/cancel`
 
@@ -126,6 +127,11 @@ Later phases will add notifications for:
 - `review blockers found`: blockers found, task moved to fix loop or `needs_fix`.
 - `task ready`: task ready for human review.
 - `task failed`: task failed with reason.
+
+Current phase note:
+
+- the bot can now approve or reject a plan after a worker/planner step has already moved the task into `waiting_plan_approval`;
+- proactive Telegram notifications for planner results are still not implemented.
 
 ## Message Limits
 

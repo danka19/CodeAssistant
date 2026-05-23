@@ -6,6 +6,14 @@ from dataclasses import dataclass
 
 from ai_orchestrator.db.models import TaskRecord
 from ai_orchestrator.db.repository import TaskRepository
+from ai_orchestrator.integrations.claude_runner import ClaudeRunnerExecutionError
+from ai_orchestrator.services.planning_service import (
+    InvalidRiskLevelError,
+    PlanningContextError,
+    PlanningResult,
+    PlanningService,
+    TaskNotPlanningError,
+)
 from ai_orchestrator.services.workspace_preparation_service import (
     RepositoryAliasNotFoundError,
     TaskLookupError,
@@ -25,6 +33,10 @@ class TaskNotQueuedError(WorkerLoopError):
     """Raised when a worker action expects a queued task."""
 
 
+class InvalidWorkerRiskLevelError(WorkerLoopError):
+    """Raised when the worker receives an unsupported planning risk level."""
+
+
 @dataclass(slots=True)
 class WorkerPreparationResult:
     """Returned after the worker prepares a task workspace."""
@@ -33,17 +45,29 @@ class WorkerPreparationResult:
     workspace: WorkspacePreparationResult
 
 
+@dataclass(slots=True)
+class WorkerPlanningResult:
+    """Returned after the worker completes the planning boundary."""
+
+    task: TaskRecord
+    planning: PlanningResult
+
+
 class WorkerLoop:
     """Phase 2 worker bridge for repository and worktree preparation."""
+
+    VALID_RISK_LEVELS = frozenset({"low", "medium", "high"})
 
     def __init__(
         self,
         *,
         repository: TaskRepository,
         workspace_preparation_service: WorkspacePreparationService,
+        planning_service: PlanningService,
     ) -> None:
         self._repository = repository
         self._workspace_preparation_service = workspace_preparation_service
+        self._planning_service = planning_service
 
     def prepare_task_workspace(
         self,
@@ -104,3 +128,32 @@ class WorkerLoop:
             created_at=utc_now_iso(),
         )
         return WorkerPreparationResult(task=updated_task, workspace=workspace_result)
+
+    def plan_task(
+        self,
+        *,
+        task_id: str,
+        risk_level: str,
+    ) -> WorkerPlanningResult:
+        """Run the Phase 3 Claude planner for a task already in planning."""
+
+        if risk_level not in self.VALID_RISK_LEVELS:
+            allowed = ", ".join(sorted(self.VALID_RISK_LEVELS))
+            raise InvalidWorkerRiskLevelError(
+                f"Invalid risk level '{risk_level}'. Expected one of: {allowed}.",
+            )
+
+        try:
+            planning_result = self._planning_service.plan_task(
+                task_id=task_id,
+                risk_level=risk_level,
+            )
+        except (
+            LookupError,
+            TaskNotPlanningError,
+            PlanningContextError,
+            InvalidRiskLevelError,
+            ClaudeRunnerExecutionError,
+        ):
+            raise
+        return WorkerPlanningResult(task=planning_result.task, planning=planning_result)

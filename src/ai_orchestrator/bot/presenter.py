@@ -47,15 +47,29 @@ def format_unauthorized() -> str:
 
 
 def format_help() -> str:
-    """Render the Phase 1 command help."""
+    """Render the current command help."""
 
     return (
         "Available commands:\n"
         "/task <description> - create a queued task.\n"
         "/tasks - browse recent tasks.\n"
         "/status <task_id> - show current task status.\n"
+        "/approve <task_id> - approve a waiting plan.\n"
+        "/reject <task_id> [reason] - reject a waiting plan.\n"
         "/help - show this command summary."
     )
+
+
+def format_plan_approved(task: TaskRecord) -> str:
+    """Render a plan approval response."""
+
+    return f"{task.task_id} approved. Status: {task.status}."
+
+
+def format_plan_rejected(task: TaskRecord) -> str:
+    """Render a plan rejection response."""
+
+    return f"{task.task_id} rejected. Status: {task.status}."
 
 
 def format_tasks_menu(tasks: list[TaskRecord]) -> tuple[str, list[TaskMenuItem]]:

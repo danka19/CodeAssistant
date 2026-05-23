@@ -30,6 +30,34 @@ Open follow-up:
 
 ## Entries
 
+## 2026-05-23 - phase-3 planner bridge and approval commands
+Status: done
+Actor: root assistant
+Summary: Added a manual Phase 3 Claude planning bridge with persisted `runs/<task-id>/input.md`, `plan.md` or `architecture_plan.md`, `planning.log`, risk-based transitions into `implementing` or `waiting_plan_approval`, and Telegram `/approve` plus `/reject` commands for manual plan decisions.
+Docs updated:
+- `README.md`
+- `docs/06_TELEGRAM_BOT_SPEC.md`
+- `docs/07_VPS_WORKER_SPEC.md`
+- `docs/09_TASK_STATES.md`
+- `docs/state/CURRENT_STATE.md`
+- `docs/logs/TASK_LOG.md`
+Checks:
+- `python -m compileall src tests`
+- `python -m pytest -q`
+- `python -m ruff check .`
+- `python -m ruff format --check .`
+- `python -m ai_orchestrator.app plan-task --config data/test-runtime/phase3-smoke/config.yaml --database-path data/test-runtime/phase3-smoke/tasks.sqlite3 --task-id task-smoke-1 --risk medium`
+Evidence:
+- `src/ai_orchestrator/integrations/claude_runner.py`
+- `src/ai_orchestrator/services/planning_service.py`
+- `src/ai_orchestrator/worker/loop.py`
+- `src/ai_orchestrator/bot/handlers.py`
+- `src/ai_orchestrator/app.py`
+- `tests/unit/test_planning_service.py`
+- `tests/unit/test_intake_approval.py`
+Open follow-up:
+- add proactive Telegram notifications for planner results and wire approval decisions into the future implementer loop instead of stopping at `implementing`
+
 ## 2026-05-23 - telegram timeout retry hotfix
 Status: done
 Actor: root assistant

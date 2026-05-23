@@ -5,6 +5,7 @@ from __future__ import annotations
 from ai_orchestrator.bot import presenter
 from ai_orchestrator.services.intake_service import (
     IntakeService,
+    TaskApprovalStateError,
     TaskNotFoundError,
     UnauthorizedUserError,
     ValidationError,
@@ -77,6 +78,42 @@ class BotCommandHandler:
             return presenter.format_unauthorized()
         return presenter.format_help()
 
+    def handle_approve_command(self, user_id: int, command_text: str) -> str:
+        """Handle `/approve <task_id>`."""
+
+        task_id = self._extract_argument("/approve", command_text)
+        try:
+            task = self._intake_service.approve_plan(user_id=user_id, task_id=task_id)
+        except UnauthorizedUserError:
+            return presenter.format_unauthorized()
+        except ValidationError as error:
+            return presenter.format_validation_error(str(error))
+        except TaskApprovalStateError as error:
+            return presenter.format_validation_error(str(error))
+        except TaskNotFoundError:
+            return presenter.format_not_found(task_id)
+        return presenter.format_plan_approved(task)
+
+    def handle_reject_command(self, user_id: int, command_text: str) -> str:
+        """Handle `/reject <task_id> [reason]`."""
+
+        task_id, reason = self._extract_reject_arguments(command_text)
+        try:
+            task = self._intake_service.reject_plan(
+                user_id=user_id,
+                task_id=task_id,
+                reason=reason,
+            )
+        except UnauthorizedUserError:
+            return presenter.format_unauthorized()
+        except ValidationError as error:
+            return presenter.format_validation_error(str(error))
+        except TaskApprovalStateError as error:
+            return presenter.format_validation_error(str(error))
+        except TaskNotFoundError:
+            return presenter.format_not_found(task_id)
+        return presenter.format_plan_rejected(task)
+
     @staticmethod
     def _extract_argument(command: str, command_text: str) -> str:
         """Extract the payload after a command prefix."""
@@ -85,3 +122,11 @@ class BotCommandHandler:
         if normalized.startswith(command):
             return normalized[len(command) :].strip()
         return normalized
+
+    @classmethod
+    def _extract_reject_arguments(cls, command_text: str) -> tuple[str, str]:
+        normalized = cls._extract_argument("/reject", command_text)
+        if not normalized:
+            return "", ""
+        task_id, _, reason = normalized.partition(" ")
+        return task_id.strip(), reason.strip()

@@ -6,28 +6,30 @@ The MVP accepts a task from Telegram, prepares a task brief, asks Claude to prod
 
 ## Current Phase
 
-The repository has completed the initial minimal implementation for `Phase 1 - Telegram Intake` from [docs/12_IMPLEMENTATION_ROADMAP.md](docs/12_IMPLEMENTATION_ROADMAP.md). Work is now in `Phase 2 - GitHub/Repo Manager`, with repository/worktree preparation foundations and a manual worker bridge landed for operator-driven workspace setup.
+The repository has completed the initial minimal implementation for `Phase 1 - Telegram Intake` from [docs/12_IMPLEMENTATION_ROADMAP.md](docs/12_IMPLEMENTATION_ROADMAP.md). Work is now in `Phase 3 - Claude Planning`, with the Phase 2 repository/worktree bridge already merged and the first manual planning boundary now landed.
 
 What is already implemented:
 
 - folder-first repository layout with code, config, tests, docs, and runtime placeholders split by directory;
 - Python project bootstrap in `src/ai_orchestrator/`;
 - tracked config template in `config/config.example.yaml`;
-- runnable Telegram polling intake bot for `/task`, `/tasks`, `/status`, and `/help`;
+- runnable Telegram polling intake bot for `/task`, `/tasks`, `/status`, `/approve`, `/reject`, and `/help`;
 - task browsing through `/tasks` with Telegram buttons that open per-task status;
 - SQLite-backed task/event persistence plus allowlist checks;
 - CLI entrypoint: `python -m ai_orchestrator.app` or `ai-orchestrator`;
 - manual Phase 2 worker bridge: `prepare-workspace --task-id <task-id> --repo-alias <alias>`;
 - manual Phase 2 GitHub auth check: `check-github-auth`;
+- manual Phase 3 planner bridge: `plan-task --task-id <task-id> --risk <low|medium|high>`;
+- Claude planner subprocess boundary through non-interactive `claude -p`, with `plan.md` or `architecture_plan.md` persisted under `runs/<task-id>/`;
 - unit and integration tests for the completed Phase 1 intake flow.
 
 Still out of scope at the current phase boundary:
 
-- task planning and approval workflow;
-- Claude/Codex subprocess runners;
 - full automatic GitHub branch/worktree/PR automation from intake through planner;
 - full worker execution loop;
-- `/log`, `/approve`, `/reject`, and `/cancel`;
+- proactive Telegram notifications for planner/implementer/review transitions;
+- `/log` and `/cancel`;
+- Codex implementation, checks, commit, push, and PR creation;
 - Docker Compose, Kubernetes, dashboards, or auto-deploy.
 
 ## Repository Layout
@@ -115,6 +117,30 @@ python -m ai_orchestrator.app check-github-auth
 ```
 
 This validates that the configured GitHub token env is present and that `gh auth status` succeeds without printing the token.
+
+## Phase 3 Operator Bridge
+
+The current Phase 3 slice adds a manual operator-facing planning bridge before the full automated worker loop exists:
+
+```bash
+python -m ai_orchestrator.app plan-task --task-id task-123 --risk medium
+```
+
+This command:
+
+- requires a task already in `planning` with assigned branch/worktree metadata;
+- writes `runs/<task-id>/input.md`;
+- runs the configured Claude planner command in non-interactive print mode;
+- persists `plan.md` or `architecture_plan.md` plus `planning.log`;
+- moves low-risk tasks to `implementing`;
+- moves medium/high-risk tasks to `waiting_plan_approval`.
+
+The Telegram command surface now includes manual approval controls for that gate:
+
+```text
+/approve <task_id>
+/reject <task_id> [reason]
+```
 
 ## Documentation Map
 

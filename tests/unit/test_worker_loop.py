@@ -3,11 +3,16 @@ from dataclasses import dataclass
 import pytest
 
 from ai_orchestrator.db.repository import TaskRepository
+from ai_orchestrator.services.planning_service import PlanningResult
 from ai_orchestrator.services.workspace_preparation_service import (
     RepositoryAliasNotFoundError,
     WorkspacePreparationResult,
 )
-from ai_orchestrator.worker.loop import TaskNotQueuedError, WorkerLoop
+from ai_orchestrator.worker.loop import (
+    InvalidWorkerRiskLevelError,
+    TaskNotQueuedError,
+    WorkerLoop,
+)
 from tests.support import make_runtime_test_dir, remove_runtime_test_dir
 
 
@@ -20,6 +25,21 @@ class _FakeWorkspacePreparationService:
     def prepare_workspace(self, *, task_id: str, repo_alias: str) -> WorkspacePreparationResult:
         if self.calls is not None:
             self.calls.append((task_id, repo_alias))
+        if self.error is not None:
+            raise self.error
+        assert self.result is not None
+        return self.result
+
+
+@dataclass(slots=True)
+class _FakePlanningService:
+    result: PlanningResult | None = None
+    error: Exception | None = None
+    calls: list[tuple[str, str]] | None = None
+
+    def plan_task(self, *, task_id: str, risk_level: str) -> PlanningResult:
+        if self.calls is not None:
+            self.calls.append((task_id, risk_level))
         if self.error is not None:
             raise self.error
         assert self.result is not None
@@ -53,6 +73,7 @@ def test_prepare_task_workspace_transitions_task_to_planning() -> None:
         worker = WorkerLoop(
             repository=repository,
             workspace_preparation_service=fake_service,  # type: ignore[arg-type]
+            planning_service=_FakePlanningService(),  # type: ignore[arg-type]
         )
         result = worker.prepare_task_workspace(
             task_id=task.task_id,
@@ -90,6 +111,7 @@ def test_prepare_task_workspace_marks_task_failed_when_workspace_preparation_fai
         worker = WorkerLoop(
             repository=repository,
             workspace_preparation_service=fake_service,  # type: ignore[arg-type]
+            planning_service=_FakePlanningService(),  # type: ignore[arg-type]
         )
         with pytest.raises(RepositoryAliasNotFoundError):
             worker.prepare_task_workspace(
@@ -126,6 +148,7 @@ def test_prepare_task_workspace_rejects_non_queued_task() -> None:
         worker = WorkerLoop(
             repository=repository,
             workspace_preparation_service=fake_service,  # type: ignore[arg-type]
+            planning_service=_FakePlanningService(),  # type: ignore[arg-type]
         )
         with pytest.raises(TaskNotQueuedError):
             worker.prepare_task_workspace(
@@ -134,3 +157,73 @@ def test_prepare_task_workspace_rejects_non_queued_task() -> None:
             )
     finally:
         remove_runtime_test_dir(runtime_dir)
+
+
+def test_plan_task_returns_planning_result() -> None:
+    runtime_dir = make_runtime_test_dir("worker-plan-success")
+    try:
+        repository = TaskRepository(runtime_dir / "tasks.sqlite3")
+        repository.initialize()
+        task = repository.create_task(
+            task_id="task-worker-4",
+            source_text="Plan worker bridge",
+            status="planning",
+            requested_by=1001,
+            created_at="2026-05-23T00:00:00Z",
+            updated_at="2026-05-23T00:00:00Z",
+        )
+        planning_result = PlanningResult(
+            task=task,
+            risk_level="medium",
+            artifact_path=runtime_dir / "runs" / task.task_id / "plan.md",
+            log_path=runtime_dir / "runs" / task.task_id / "planning.log",
+            approval_required=True,
+        )
+        fake_planning_service = _FakePlanningService(
+            result=planning_result,
+            calls=[],
+        )
+        worker = WorkerLoop(
+            repository=repository,
+            workspace_preparation_service=_FakeWorkspacePreparationService(),  # type: ignore[arg-type]
+            planning_service=fake_planning_service,  # type: ignore[arg-type]
+        )
+        result = worker.plan_task(
+            task_id=task.task_id,
+            risk_level="medium",
+        )
+    finally:
+        remove_runtime_test_dir(runtime_dir)
+
+    assert result.planning.approval_required is True
+    assert fake_planning_service.calls == [("task-worker-4", "medium")]
+
+
+def test_plan_task_rejects_invalid_risk_level() -> None:
+    runtime_dir = make_runtime_test_dir("worker-plan-invalid-risk")
+    try:
+        repository = TaskRepository(runtime_dir / "tasks.sqlite3")
+        repository.initialize()
+        task = repository.create_task(
+            task_id="task-worker-5",
+            source_text="Plan worker bridge",
+            status="planning",
+            requested_by=1001,
+            created_at="2026-05-23T00:00:00Z",
+            updated_at="2026-05-23T00:00:00Z",
+        )
+        fake_planning_service = _FakePlanningService(calls=[])
+        worker = WorkerLoop(
+            repository=repository,
+            workspace_preparation_service=_FakeWorkspacePreparationService(),  # type: ignore[arg-type]
+            planning_service=fake_planning_service,  # type: ignore[arg-type]
+        )
+        with pytest.raises(InvalidWorkerRiskLevelError, match="Invalid risk level"):
+            worker.plan_task(
+                task_id=task.task_id,
+                risk_level="urgent",
+            )
+    finally:
+        remove_runtime_test_dir(runtime_dir)
+
+    assert fake_planning_service.calls == []
