@@ -119,6 +119,21 @@ class TaskRepository:
             ).fetchall()
         return [EventRecord(**dict(row)) for row in rows]
 
+    def list_tasks(self, *, limit: int = 10) -> list[TaskRecord]:
+        """List most recent tasks first."""
+
+        with self._connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT task_id, source_text, status, requested_by, created_at, updated_at
+                FROM tasks
+                ORDER BY created_at DESC
+                LIMIT ?
+                """,
+                (limit,),
+            ).fetchall()
+        return [TaskRecord(**dict(row)) for row in rows]
+
     def _connect(self) -> sqlite3.Connection:
         connection = sqlite3.connect(self._database_path)
         connection.row_factory = sqlite3.Row

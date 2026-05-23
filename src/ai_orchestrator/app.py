@@ -2,13 +2,21 @@
 
 from __future__ import annotations
 
+import argparse
+import os
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Sequence
 
 from ai_orchestrator.bot.handlers import BotCommandHandler
+from ai_orchestrator.bot.runtime import create_polling_application
 from ai_orchestrator.config.loader import AppConfig, load_app_config
 from ai_orchestrator.db.repository import TaskRepository
 from ai_orchestrator.services.intake_service import IntakeService
+
+DEFAULT_CONFIG_PATH = Path("config/config.example.yaml")
+DEFAULT_DATABASE_PATH = Path("data/tasks.sqlite3")
+DEFAULT_ENV_PATH = Path(".env.local")
 
 
 @dataclass(slots=True)
@@ -38,3 +46,73 @@ def build_application(config_path: Path, database_path: Path) -> ApplicationCont
         intake_service=intake_service,
         bot_handler=bot_handler,
     )
+
+
+def run_telegram_polling(config_path: Path, database_path: Path) -> None:
+    """Start the Phase 1 Telegram intake bot in polling mode."""
+
+    load_env_file(DEFAULT_ENV_PATH)
+    context = build_application(config_path=config_path, database_path=database_path)
+    token_env = context.config.telegram.bot_token_env
+    bot_token = os.getenv(token_env)
+    if not bot_token or bot_token == "PASTE_REAL_BOT_TOKEN_HERE":
+        raise RuntimeError(
+            f"Missing Telegram bot token in environment variable: {token_env}",
+        )
+
+    application = create_polling_application(
+        bot_token=bot_token,
+        command_handler=context.bot_handler,
+    )
+    application.run_polling()
+
+
+def load_env_file(path: Path) -> None:
+    """Load simple KEY=VALUE pairs from a local env file if it exists."""
+
+    if not path.exists():
+        return
+
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+
+        key, value = line.split("=", 1)
+        normalized_key = key.strip()
+        if not normalized_key:
+            continue
+
+        normalized_value = value.strip().strip('"').strip("'")
+        os.environ.setdefault(normalized_key, normalized_value)
+
+
+def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
+    """Parse CLI arguments for the Phase 1 Telegram bot."""
+
+    parser = argparse.ArgumentParser(description="Run the Phase 1 Telegram intake bot.")
+    parser.add_argument(
+        "--config",
+        type=Path,
+        default=DEFAULT_CONFIG_PATH,
+        help="Path to the YAML config file.",
+    )
+    parser.add_argument(
+        "--database-path",
+        type=Path,
+        default=DEFAULT_DATABASE_PATH,
+        help="Path to the SQLite database file.",
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    """CLI entrypoint for the Phase 1 Telegram intake bot."""
+
+    args = parse_args(argv)
+    run_telegram_polling(config_path=args.config, database_path=args.database_path)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

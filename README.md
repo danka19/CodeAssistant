@@ -6,15 +6,18 @@ The MVP accepts a task from Telegram, prepares a task brief, asks Claude to prod
 
 ## Current Phase
 
-The repository has closed `Phase 0 - Project Bootstrap` and now implements the first slice of `Phase 1 - Telegram Intake` from [docs/12_IMPLEMENTATION_ROADMAP.md](docs/12_IMPLEMENTATION_ROADMAP.md).
+The repository has completed the initial minimal implementation for `Phase 1 - Telegram Intake` from [docs/12_IMPLEMENTATION_ROADMAP.md](docs/12_IMPLEMENTATION_ROADMAP.md). This branch closes that intake foundation and the next product implementation phase is `Phase 2 - GitHub/Repo Manager`.
 
 What is already implemented:
 
 - folder-first repository layout with code, config, tests, docs, and runtime placeholders split by directory;
 - Python project bootstrap in `src/ai_orchestrator/`;
 - tracked config template in `config/config.example.yaml`;
-- minimal SQLite-backed intake flow for `/task` and `/status`;
-- unit and integration tests for the current intake slice.
+- runnable Telegram polling intake bot for `/task`, `/tasks`, `/status`, and `/help`;
+- task browsing through `/tasks` with Telegram buttons that open per-task status;
+- SQLite-backed task/event persistence plus allowlist checks;
+- CLI entrypoint: `python -m ai_orchestrator.app` or `ai-orchestrator`;
+- unit and integration tests for the completed Phase 1 intake flow.
 
 Still out of scope at the current phase boundary:
 
@@ -53,6 +56,39 @@ Current fixed choices:
 - no auto-merge;
 - no auto-deploy;
 - no Docker Compose in the first MVP.
+
+## Phase 1 Local Run
+
+Minimal local smoke-test:
+
+1. Install dependencies.
+2. Put the real bot token into environment variable `TELEGRAM_BOT_TOKEN`.
+3. Put your Telegram numeric user id either into `telegram.allowed_user_ids` in config or into env variable `TELEGRAM_ALLOWED_USER_IDS`.
+4. Run `python -m ai_orchestrator.app --config config/config.example.yaml --database-path data/tasks.sqlite3`.
+5. In Telegram, test `/help`, `/task test intake`, `/tasks`, and `/status <task_id>`.
+
+Repository-side verification for this branch also includes a real local entrypoint launch check through `python run_bot.py --help` plus a startup attempt with test env values. In this environment the startup path reaches Telegram client initialization and then stops on outbound network failure, which is the current limit of local live verification here.
+
+The app also auto-loads `.env.local` from the repository root, so for local manual testing you can put the token there instead of exporting it in the shell.
+
+You can also use the installed script entrypoint:
+
+```bash
+ai-orchestrator --config config/config.example.yaml --database-path data/tasks.sqlite3
+```
+
+If you prefer keeping Telegram token and allowlist next to each other, create `.env.local` in the repo root:
+
+```text
+TELEGRAM_BOT_TOKEN=123456:real-token
+TELEGRAM_ALLOWED_USER_IDS=123456789
+```
+
+Or run directly from the repository root without package installation:
+
+```bash
+python run_bot.py --config config/config.example.yaml --database-path data/tasks.sqlite3
+```
 
 ## Documentation Map
 

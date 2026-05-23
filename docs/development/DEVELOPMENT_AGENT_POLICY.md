@@ -38,12 +38,15 @@ Use the documentation architecture deliberately:
 - `docs/plans/PLAN_INDEX.md` is a routing document that points to plan sources; it does not by itself choose the track you should work on.
 - `docs/state/CURRENT_STATE.md` is a factual status document; use it to understand what is currently true, but do not let it override the canonical product roadmap.
 - Numbered product phases in `docs/12_IMPLEMENTATION_ROADMAP.md` should be treated as product-delivery phases unless a phase explicitly states otherwise.
+- Do not treat a minimal vertical slice or bootstrap increment as completion of a roadmap phase unless the remaining implementation items and readiness criteria for that phase are satisfied.
 - Documentation, governance, migration, and knowledge-system plans are support tracks. They become the active work track only when:
   - the user explicitly asks for documentation/governance work; or
   - the current implementation task is itself about documentation architecture or repository policy.
 - When both a product roadmap and a documentation/support plan are active, prefer the product roadmap for feature implementation and prefer the support plan for documentation-structure work.
 - Do not infer that the highest-numbered phase is the next product step. Match the phase to the work domain instead.
 - If a summary document, status note, or secondary plan appears to conflict with `docs/12_IMPLEMENTATION_ROADMAP.md`, treat `docs/12_IMPLEMENTATION_ROADMAP.md` as authoritative for product implementation and surface the discrepancy in your summary.
+- Prefer multi-agent execution when the work benefits from separation of analysis, implementation, verification, or review responsibilities.
+- A single assistant may complete the task locally only when the change is genuinely small, does not involve important decisions, and has low realistic risk of coding error.
 - The detailed procedure for `continue by plan` lives in project-local skill `task-router`.
 - The detailed close-out procedure for implementation work lives in project-local skill `implementation-protocol`.
 - The detailed verification procedure lives in project-local skill `verification-gate`.
@@ -90,15 +93,24 @@ Represent these boundaries with separate modules, typed artifacts, and explicit 
 
 - Work through branches and PRs.
 - Use the project-local skill `implementation-protocol` when preparing scoped edits and close-out work.
+- Before starting implementation work, run a repository sync step:
+  - fetch the remote repository;
+  - update local `main` from `origin/main`;
+  - confirm that the branch point for new work is the updated `main`.
 - Phase work must happen in a branch that clearly corresponds to the active roadmap phase or approved phase slice.
+- Create the working branch only after the sync step succeeds.
 - Do not perform phase work directly on `main`.
+- Name the working branch so the active phase is obvious from the branch name.
+- If local `main` cannot be updated safely, stop and get human agreement before branching or editing phase work.
 - After completing an implementation slice for the active phase, create a commit and push the branch so the work is reviewable.
+- Do not declare a roadmap phase complete just because one useful slice works locally; phase completion requires satisfying that phase's stated implementation scope and readiness criteria in `docs/12_IMPLEMENTATION_ROADMAP.md`.
 - If a full roadmap phase is considered complete, merge to `main` happens only after human approval and with a clear summary of what was implemented, verified, and left open.
 - Do not rewrite unrelated files.
 - Do not do opportunistic refactoring.
 - Do not reformat the whole repository unless the task is specifically about formatting.
 - Do not commit generated runtime logs, local SQLite databases, CLI auth state, or `.env` files.
 - Add `.gitignore` entries before creating local runtime artifacts.
+- If environment restrictions block meaningful implementation, verification, or live smoke testing, first determine the specific boundary, then stop and get human agreement on how to adjust the environment. Do not quietly accept the reduced environment as "good enough" when it prevents proper completion of the requested work.
 
 ## Testing Expectations
 
@@ -126,12 +138,21 @@ python -m ruff format --check .
 
 If checks cannot run because the project is not yet bootstrapped, state that explicitly and provide manual verification steps.
 
+Do not treat dry verification as sufficient for user-visible or runtime-facing changes when a realistic smoke path is available in the current environment. Before claiming the work is ready in those cases:
+
+- run the closest practical live smoke test for the changed path;
+- prefer exercising the real entrypoint over only calling internal functions;
+- state exactly what was run and what behavior was observed;
+- if the live smoke path is blocked by missing credentials, unavailable services, or environment limits, say that explicitly and do not imply readiness beyond the dry checks.
+- if the block matters to completing the requested work, stop and agree with the user on the needed environment setup instead of continuing as though the missing capability were acceptable.
+
 ## Documentation Rules
 
 - Update docs when behavior, architecture, security policy, state machine, CLI commands, config, or workflow changes.
 - Keep MVP and future expansion separate.
 - Put future-only ideas in `docs/15_FUTURE_EXPANSION.md`.
 - Use project-local skill `implementation-protocol` for the operational close-out checklist that applies these rules.
+- If branch-start procedure changes, update both `AGENTS.md` and this policy document together.
 - When documenting roadmap status, explicitly say whether you mean:
   - active product phase; or
   - active documentation/support track.

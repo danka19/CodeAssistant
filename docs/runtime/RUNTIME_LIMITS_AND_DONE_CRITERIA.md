@@ -42,6 +42,7 @@ A runtime task may reach `ready_for_human` only when:
 - the diff matches the approved plan;
 - unrelated files were not changed;
 - checks ran, or their absence was explicitly documented;
+- when the changed behavior has a realistic runnable smoke path in the available environment, that smoke path was exercised and the observed result was recorded;
 - manual verification steps were recorded when automated tests are missing;
 - the reviewer found no unhandled blockers;
 - the summary artifact was written;

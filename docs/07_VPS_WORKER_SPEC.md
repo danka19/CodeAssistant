@@ -35,7 +35,7 @@
 
 ### `/src/ai_orchestrator/bot/`
 
-Telegram command handlers and response formatting. Phase 1 currently implements `/task` and `/status`.
+Telegram command handlers, polling runtime adapter, and response formatting. Phase 1 implements `/task`, `/tasks`, `/status`, `/help`, and a polling startup path.
 
 ### `/src/ai_orchestrator/worker/`
 
@@ -142,6 +142,12 @@ ai-orchestrator.service
 ```
 
 The service runs the Python process under user `ai-orchestrator`, with a restricted working directory and env file.
+
+Phase 1 startup command can be:
+
+```text
+ai-orchestrator --config /srv/ai-orchestrator/config/config.yaml --database-path /srv/ai-orchestrator/data/tasks.sqlite3
+```
 
 ## Docker Compose
 

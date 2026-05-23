@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import os
 from pathlib import Path
 
 import yaml
@@ -23,6 +24,7 @@ class RuntimeConfig:
 class TelegramConfig:
     bot_token_env: str
     allowed_user_ids: list[int]
+    allowed_user_ids_env: str | None = None
 
 
 @dataclass(slots=True)
@@ -54,13 +56,34 @@ def load_app_config(path: Path) -> AppConfig:
     """Load YAML configuration into typed dataclasses."""
 
     raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    telegram_config = TelegramConfig(**raw["telegram"])
+    if telegram_config.allowed_user_ids_env:
+        env_value = os.getenv(telegram_config.allowed_user_ids_env, "").strip()
+        if env_value:
+            telegram_config.allowed_user_ids = _parse_allowed_user_ids(env_value)
     repositories = {
         alias: RepositoryConfig(**repo_data)
         for alias, repo_data in raw.get("repositories", {}).items()
     }
     return AppConfig(
         runtime=RuntimeConfig(**raw["runtime"]),
-        telegram=TelegramConfig(**raw["telegram"]),
+        telegram=telegram_config,
         github=GitHubConfig(**raw["github"]),
         repositories=repositories,
     )
+
+
+def _parse_allowed_user_ids(raw_value: str) -> list[int]:
+    """Parse comma-separated Telegram user ids from environment config."""
+
+    stripped_value = raw_value.strip()
+    if stripped_value.startswith("[") and stripped_value.endswith("]"):
+        stripped_value = stripped_value[1:-1]
+
+    values: list[int] = []
+    for token in stripped_value.split(","):
+        normalized = token.strip()
+        if not normalized:
+            continue
+        values.append(int(normalized))
+    return values

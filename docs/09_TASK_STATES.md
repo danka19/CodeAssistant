@@ -10,8 +10,7 @@ Current implementation status:
 ## State Machine
 
 ```text
-created
--> queued
+queued
 -> planning
 -> waiting_plan_approval
 -> implementing
@@ -39,7 +38,6 @@ plan_rejected
 
 | Status | Meaning | Changed By | Next Statuses | Data |
 |---|---|---|---|---|
-| `created` | Task accepted by bot | Bot | `queued`, `cancelled` | input, user_id, repo_alias |
 | `queued` | Task waiting for worker | Bot/Worker | `planning`, `cancelled`, `failed` | task_id, priority, created_at |
 | `planning` | Claude prepares plan | Worker | `waiting_plan_approval`, `implementing`, `failed`, `cancelled` | branch, worktree, planning log |
 | `waiting_plan_approval` | Approval required | Worker | `implementing`, `plan_rejected`, `cancelled` | plan path, approval request |
@@ -57,7 +55,6 @@ plan_rejected
 
 ## Transition Rules
 
-- Do not move from `created` directly to `implementing`.
 - Do not create PR without branch and worktree.
 - Do not set `ready_for_human` without PR URL or explicit non-coding result.
 - Do not set `done` automatically after PR creation.
@@ -69,6 +66,8 @@ plan_rejected
 For the currently implemented intake slice:
 
 - `/task` stores a task in SQLite with status `queued`;
+- `/tasks` lists recent tasks and opens per-task status through Telegram buttons;
 - `/status` reads the current stored status;
+- `/help` returns the available intake commands;
 - unauthorized requests are rejected without creating a task;
 - worker-side transitions start only in later phases.
