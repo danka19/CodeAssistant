@@ -8,7 +8,7 @@ Current implementation status:
 - The current Phase 2 operator bridge can transition a queued task to `planning` after branch/worktree preparation is complete.
 - The current Phase 3 planner bridge can transition a planning task to `implementing` for low risk or `waiting_plan_approval` for medium/high risk while persisting planning artifacts under `runs/`.
 - Telegram `/approve` and `/reject` now operate on tasks in `waiting_plan_approval`.
-- The rest of the workflow states remain planned for later phases.
+- After a successful manual Phase 4 implementer run, tasks now progress from `implementing` to `testing` and then to `creating_pr` as a handoff boundary (without Phase 5 push/PR behavior).
 
 ## State Machine
 
@@ -77,4 +77,5 @@ For the currently implemented repository slice:
 - unauthorized requests are rejected without creating a task;
 - the manual `prepare-workspace` CLI bridge can prepare repo/worktree and move a queued task to `planning`;
 - the manual `plan-task` CLI bridge can run Claude planning, persist `input.md`, `plan.md` or `architecture_plan.md`, and move the task to the next approval boundary;
-- Codex implementation, PR, and review transitions still start in later phases.
+- the manual `implement-task` CLI bridge can run Codex from the approved plan artifact, persist `implementation.log` and `test.log`, capture git status/diff summary in `summary.md`, run configured checks, create a local commit on success, and transition status `implementing -> testing -> creating_pr`;
+- push/PR creation and review transitions still start in later phases.

@@ -11,8 +11,8 @@
 7. If approval is required, the task waits for `/approve` or `/reject`.
 8. The Codex runner implements the plan.
 9. The worker runs build/test/lint when configured.
-10. The worker creates a commit and pushes.
-11. GitHub integration creates the PR.
+10. The worker creates a local commit after checks pass.
+11. GitHub integration later pushes and creates the PR.
 12. CI watcher and review runner check the result.
 13. If blockers exist, a fix loop starts or the task moves to `needs_fix`.
 14. The notification service sends the report and PR URL.
@@ -28,7 +28,7 @@ Behavior:
 - Claude writes a short `plan.md`.
 - Codex implements immediately after planning.
 - Git diff/status and available checks are required.
-- PR is created automatically.
+- Local commit is created automatically after checks pass.
 - Review gate remains required, but can be short.
 
 Flow:

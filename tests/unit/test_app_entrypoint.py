@@ -87,6 +87,19 @@ def test_parse_args_supports_plan_task_command() -> None:
     assert args.risk == "medium"
 
 
+def test_parse_args_supports_implement_task_command() -> None:
+    args = parse_args(
+        [
+            "implement-task",
+            "--task-id",
+            "task-123",
+        ]
+    )
+
+    assert args.command == "implement-task"
+    assert args.task_id == "task-123"
+
+
 def test_parse_args_uses_real_sys_argv_when_not_overridden(monkeypatch) -> None:
     monkeypatch.setattr(
         "sys.argv",
@@ -177,3 +190,23 @@ def test_main_routes_plan_task_command(monkeypatch) -> None:
     assert exit_code == 0
     assert captured["task_id"] == "task-123"
     assert captured["risk_level"] == "high"
+
+
+def test_main_routes_implement_task_command(monkeypatch) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_implement_task(**kwargs) -> None:
+        captured.update(kwargs)
+
+    monkeypatch.setattr("ai_orchestrator.app.implement_task", fake_implement_task)
+
+    exit_code = main(
+        [
+            "implement-task",
+            "--task-id",
+            "task-123",
+        ]
+    )
+
+    assert exit_code == 0
+    assert captured["task_id"] == "task-123"

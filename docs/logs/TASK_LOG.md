@@ -30,6 +30,54 @@ Open follow-up:
 
 ## Entries
 
+## 2026-05-24 - phase-4 status consistency follow-up
+Status: done
+Actor: root assistant
+Summary: Tightened the Phase 4 manual implementer bridge so successful `implement-task` execution now advances the task through `testing` into `creating_pr`, keeping the stored task state aligned with the documented workflow instead of leaving it in `implementing`.
+Docs updated:
+- `docs/07_VPS_WORKER_SPEC.md`
+- `docs/logs/TASK_LOG.md`
+Checks:
+- pending root verification
+Evidence:
+- `src/ai_orchestrator/services/implementation_service.py`
+- `src/ai_orchestrator/shared/types.py`
+- `tests/unit/test_implementation_service.py`
+- `tests/unit/test_worker_loop.py`
+Open follow-up:
+- confirm the live smoke path reaches `creating_pr` with a real local commit before Phase 4 close-out
+
+## 2026-05-24 - phase-4 codex implementation bridge
+Status: done
+Actor: programmer
+Summary: Added the first coherent Phase 4 slice with a real `codex exec` runner, a new implementation service, and a manual `implement-task` worker/CLI bridge that reads approved plan artifacts, writes `implementation.log`, captures `git status --short` and `git diff --stat` into `summary.md`, runs configured repository checks, and creates a local commit only after checks pass.
+Docs updated:
+- `docs/03_WORKFLOW.md`
+- `docs/07_VPS_WORKER_SPEC.md`
+- `docs/09_TASK_STATES.md`
+- `docs/10_LOGGING_AND_OBSERVABILITY.md`
+- `docs/state/CURRENT_STATE.md`
+- `docs/logs/TASK_LOG.md`
+Checks:
+- `codex --help`
+- `codex exec --help`
+- `python -m compileall src tests`
+- `python -m pytest -q tests/unit/test_codex_runner.py tests/unit/test_implementation_service.py tests/unit/test_worker_loop.py tests/unit/test_app_entrypoint.py tests/unit/test_config_loader.py`
+- `python -m ruff check src/ai_orchestrator/integrations/codex_runner.py src/ai_orchestrator/services/implementation_service.py src/ai_orchestrator/worker/loop.py src/ai_orchestrator/app.py src/ai_orchestrator/config/loader.py tests/unit/test_codex_runner.py tests/unit/test_implementation_service.py tests/unit/test_worker_loop.py tests/unit/test_app_entrypoint.py tests/unit/test_config_loader.py`
+Evidence:
+- `src/ai_orchestrator/integrations/codex_runner.py`
+- `src/ai_orchestrator/services/implementation_service.py`
+- `src/ai_orchestrator/worker/loop.py`
+- `src/ai_orchestrator/app.py`
+- `src/ai_orchestrator/config/loader.py`
+- `tests/unit/test_codex_runner.py`
+- `tests/unit/test_implementation_service.py`
+- `tests/unit/test_worker_loop.py`
+- `tests/unit/test_app_entrypoint.py`
+- `tests/unit/test_config_loader.py`
+Open follow-up:
+- add Phase 5 push/PR creation flow on top of this local commit boundary without regressing the no-auto-merge MVP constraints
+
 ## 2026-05-23 - phase-3 planner bridge and approval commands
 Status: done
 Actor: root assistant

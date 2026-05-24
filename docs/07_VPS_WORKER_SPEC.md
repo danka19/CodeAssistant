@@ -67,7 +67,7 @@ Claude planning/review runner boundary. The current Phase 3 slice runs the confi
 
 ### `/src/ai_orchestrator/integrations/codex_runner.py`
 
-Codex implementation runner placeholder for later phases.
+Codex implementation runner boundary. The current Phase 4 slice runs non-interactive `codex exec` in the task worktree, captures stdout/stderr, and surfaces execution failures to the implementation service.
 
 ### `/src/ai_orchestrator/shared/`
 
@@ -96,6 +96,7 @@ Current implementation note:
 - The current Phase 2 slice can run repository preparation commands through the manual `prepare-workspace` CLI bridge only.
 - The current Phase 2 slice can also validate GitHub CLI auth through the manual `check-github-auth` CLI bridge.
 - The current Phase 3 slice can run Claude planning through the manual `plan-task` CLI bridge.
+- The current Phase 4 slice can run Codex implementation through the manual `implement-task` CLI bridge, persist implementation and test logs, capture git status/diff summary, run configured checks, create a local commit only after checks pass, and hand the task off into `creating_pr`.
 
 ## MVP Configuration
 
@@ -170,6 +171,12 @@ Current Phase 3 planner bridge:
 
 ```text
 ai-orchestrator plan-task --config /srv/ai-orchestrator/config/config.yaml --database-path /srv/ai-orchestrator/data/tasks.sqlite3 --task-id task-123 --risk medium
+```
+
+Current Phase 4 implementer bridge:
+
+```text
+ai-orchestrator implement-task --config /srv/ai-orchestrator/config/config.yaml --database-path /srv/ai-orchestrator/data/tasks.sqlite3 --task-id task-123
 ```
 
 ## Docker Compose

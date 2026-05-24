@@ -14,7 +14,9 @@ from ai_orchestrator.bot.runtime import create_polling_application
 from ai_orchestrator.config.loader import AppConfig, load_app_config
 from ai_orchestrator.db.repository import TaskRepository
 from ai_orchestrator.integrations.claude_runner import ClaudeRunner
+from ai_orchestrator.integrations.codex_runner import CodexRunner
 from ai_orchestrator.integrations.github_client import GitHubClient
+from ai_orchestrator.services.implementation_service import ImplementationService
 from ai_orchestrator.services.intake_service import IntakeService
 from ai_orchestrator.services.planning_service import PlanningService
 from ai_orchestrator.services.workspace_preparation_service import WorkspacePreparationService
@@ -62,10 +64,21 @@ def build_application(config_path: Path, database_path: Path) -> ApplicationCont
         claude_runner=claude_runner,
         runs_dir=Path(config.runtime.runs_dir),
     )
+    codex_runner = CodexRunner(
+        command=config.agents.codex_implementer.command,
+        timeout_seconds=config.limits.command_timeout_seconds,
+    )
+    implementation_service = ImplementationService(
+        repository=repository,
+        config=config,
+        codex_runner=codex_runner,
+        runs_dir=Path(config.runtime.runs_dir),
+    )
     worker_loop = WorkerLoop(
         repository=repository,
         workspace_preparation_service=workspace_preparation_service,
         planning_service=planning_service,
+        implementation_service=implementation_service,
     )
     return ApplicationContext(
         config=config,
@@ -190,6 +203,31 @@ def plan_task(
     )
 
 
+def implement_task(
+    *,
+    config_path: Path,
+    database_path: Path,
+    task_id: str,
+) -> None:
+    """Run the manual Phase 4 Codex implementation bridge for one task."""
+
+    load_env_file(DEFAULT_ENV_PATH)
+    context = build_application(config_path=config_path, database_path=database_path)
+    result = context.worker_loop.implement_task(task_id=task_id)
+    print(
+        "\n".join(
+            [
+                f"Task: {result.task.task_id}",
+                f"Status: {result.task.status}",
+                f"Commit: {result.implementation.commit_sha}",
+                f"Implementation log: {result.implementation.implementation_log_path}",
+                f"Test log: {result.implementation.test_log_path}",
+                f"Summary: {result.implementation.summary_path}",
+            ]
+        )
+    )
+
+
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     """Parse CLI arguments for the current local runtime entrypoints."""
 
@@ -245,6 +283,17 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         help="Risk level used to choose approval behavior and artifact type.",
     )
 
+    implement_task_parser = subparsers.add_parser(
+        "implement-task",
+        help="Run Codex implementation for one task already in the implementing state.",
+    )
+    _add_common_path_arguments(implement_task_parser)
+    implement_task_parser.add_argument(
+        "--task-id",
+        required=True,
+        help="Implementing task id to run through Codex.",
+    )
+
     return parser.parse_args(normalized_argv)
 
 
@@ -290,6 +339,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             database_path=args.database_path,
             task_id=args.task_id,
             risk_level=args.risk,
+        )
+        return 0
+    if args.command == "implement-task":
+        implement_task(
+            config_path=args.config,
+            database_path=args.database_path,
+            task_id=args.task_id,
         )
         return 0
     raise RuntimeError(f"Unsupported command: {args.command}")

@@ -7,6 +7,15 @@ from dataclasses import dataclass
 from ai_orchestrator.db.models import TaskRecord
 from ai_orchestrator.db.repository import TaskRepository
 from ai_orchestrator.integrations.claude_runner import ClaudeRunnerExecutionError
+from ai_orchestrator.integrations.codex_runner import CodexRunnerExecutionError
+from ai_orchestrator.services.implementation_service import (
+    ImplementationContextError,
+    ImplementationResult,
+    ImplementationService,
+    PlanArtifactNotFoundError,
+    RepositoryConfigNotFoundError,
+    TaskNotImplementingError as ServiceTaskNotImplementingError,
+)
 from ai_orchestrator.services.planning_service import (
     InvalidRiskLevelError,
     PlanningContextError,
@@ -53,6 +62,14 @@ class WorkerPlanningResult:
     planning: PlanningResult
 
 
+@dataclass(slots=True)
+class WorkerImplementationResult:
+    """Returned after the worker completes Phase 4 implementation."""
+
+    task: TaskRecord
+    implementation: ImplementationResult
+
+
 class WorkerLoop:
     """Phase 2 worker bridge for repository and worktree preparation."""
 
@@ -64,10 +81,12 @@ class WorkerLoop:
         repository: TaskRepository,
         workspace_preparation_service: WorkspacePreparationService,
         planning_service: PlanningService,
+        implementation_service: ImplementationService,
     ) -> None:
         self._repository = repository
         self._workspace_preparation_service = workspace_preparation_service
         self._planning_service = planning_service
+        self._implementation_service = implementation_service
 
     def prepare_task_workspace(
         self,
@@ -157,3 +176,33 @@ class WorkerLoop:
         ):
             raise
         return WorkerPlanningResult(task=planning_result.task, planning=planning_result)
+
+    def implement_task(self, *, task_id: str) -> WorkerImplementationResult:
+        """Run the Phase 4 Codex implementation boundary for one task."""
+
+        task = self._repository.get_task(task_id)
+        if task is None:
+            raise LookupError(f"Unknown task id: {task_id}")
+        if task.status != TaskStatus.IMPLEMENTING.value:
+            raise TaskNotImplementingError(
+                f"Task {task_id} must be implementing before Codex runs, got {task.status}.",
+            )
+        try:
+            implementation_result = self._implementation_service.implement_task(task_id=task_id)
+        except (
+            LookupError,
+            ServiceTaskNotImplementingError,
+            ImplementationContextError,
+            RepositoryConfigNotFoundError,
+            PlanArtifactNotFoundError,
+            CodexRunnerExecutionError,
+        ):
+            raise
+        return WorkerImplementationResult(
+            task=implementation_result.task,
+            implementation=implementation_result,
+        )
+
+
+class TaskNotImplementingError(WorkerLoopError):
+    """Raised when a worker action expects an implementing task."""

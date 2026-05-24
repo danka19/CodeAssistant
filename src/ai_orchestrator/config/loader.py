@@ -40,9 +40,17 @@ class ClaudePlannerConfig:
 
 
 @dataclass(slots=True)
+class CodexImplementerConfig:
+    command: str
+
+
+@dataclass(slots=True)
 class AgentsConfig:
     claude_planner: ClaudePlannerConfig = field(
         default_factory=lambda: ClaudePlannerConfig(command="claude")
+    )
+    codex_implementer: CodexImplementerConfig = field(
+        default_factory=lambda: CodexImplementerConfig(command="codex")
     )
 
 
@@ -93,7 +101,10 @@ def load_app_config(path: Path) -> AppConfig:
         agents=AgentsConfig(
             claude_planner=ClaudePlannerConfig(
                 command=agents_raw.get("claude_planner", {}).get("command", "claude"),
-            )
+            ),
+            codex_implementer=CodexImplementerConfig(
+                command=agents_raw.get("codex_implementer", {}).get("command", "codex"),
+            ),
         ),
         limits=LimitsConfig(
             command_timeout_seconds=int(limits_raw.get("command_timeout_seconds", 1800)),

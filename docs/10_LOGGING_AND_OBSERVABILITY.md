@@ -15,6 +15,11 @@ For each task, save:
 /runs/task-123/events.jsonl
 ```
 
+Current implementation note:
+
+- Phase 4 now writes `implementation.log`, `test.log`, and `summary.md` during the manual `implement-task` bridge.
+- `summary.md` records `git status --short`, `git diff --stat`, check outcomes, and the local commit SHA.
+
 For large/risky tasks, also save:
 
 ```text

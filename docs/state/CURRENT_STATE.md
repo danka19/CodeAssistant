@@ -31,6 +31,7 @@ Do not use this file for speculative plans or append-only history.
 - The current Phase 2 slice also adds a manual worker/CLI bridge that prepares one queued task by explicit `task_id` and `repo_alias`, then moves that task to `planning`.
 - The GitHub integration boundary is no longer a pure stub: the current Phase 2 slice validates configured PAT-based GitHub CLI auth through a manual `check-github-auth` command.
 - An initial Phase 3 foundation now exists for Claude planning through a non-interactive `claude -p` runner boundary, persisted `runs/<task-id>/input.md`, `plan.md` or `architecture_plan.md`, `planning.log`, and task transitions into `implementing` or `waiting_plan_approval`.
+- An initial Phase 4 foundation now exists for Codex implementation through a non-interactive `codex exec` runner boundary, manual `implement-task` worker bridge, persisted `runs/<task-id>/implementation.log`, `test.log`, and `summary.md`, configured repository checks, explicit status progression `implementing -> testing -> creating_pr`, and local commit creation only after checks pass.
 - Development-time repository policy has been split into `docs/development/`.
 - Future runtime agent policy has been split into `docs/runtime/`.
 - Governance and documentation rules have been split into `docs/governance/`.
@@ -78,8 +79,9 @@ Not yet implemented:
 - The repository already has an MVP roadmap in `docs/12_IMPLEMENTATION_ROADMAP.md`.
 - `Phase 1 - Telegram Intake` is complete in the repository at the minimal initial implementation level accepted for this branch.
 - `Phase 2 - GitHub/Repo Manager` is complete at the current repository baseline accepted on `main`.
-- `Phase 3 - Claude Planning` is now in progress with a manual planner bridge, persisted planning artifacts, and Telegram approval commands landed; remaining work includes proactive planner notifications and the full automated approval/runtime flow.
-- Product implementation remains governed by Phases 3 through 7 for MVP behavior and worker capabilities.
+- `Phase 3 - Claude Planning` now has a working manual planner bridge and approval boundaries.
+- `Phase 4 - Codex Implementation` is now in progress with a manual implementer bridge; remaining work includes fuller guardrails, richer reporting polish, and automated runtime handoff into later phases.
+- Product implementation remains governed by Phases 4 through 7 for MVP behavior and worker capabilities.
 - The product roadmap contains `Phase 8 - Knowledge System Rollout` as the product-level documentation initiative.
 - The operational support-track plan for that initiative is `docs/21_PILOT_KNOWLEDGE_SYSTEM_PLAN.md`, routed via `docs/plans/PLAN_INDEX.md`.
 - These are different planning tracks:
