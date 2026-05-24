@@ -12,6 +12,7 @@ def test_loads_example_config(monkeypatch) -> None:
     assert config.telegram.allowed_user_ids == []
     assert config.telegram.allowed_user_ids_env == "TELEGRAM_ALLOWED_USER_IDS"
     assert config.agents.claude_planner.command == "claude"
+    assert config.agents.codex_implementer.command == "codex"
     assert config.limits.command_timeout_seconds == 1800
     assert "codeassistant" in config.repositories
 
